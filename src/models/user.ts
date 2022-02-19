@@ -23,11 +23,11 @@ export default class User {
         this.joinedDate = user.joinedDate;
         this.tries = user.tries;
         this.onGame = user.onGame;
-        this.notify = user.notify ?? true;
-        this.maxStreak = user.maxStreak ?? 0;
-        this.totalGamesPlayed = user.totalGamesPlayed ?? 0;
-        this.totalWins = user.totalWins ?? 0;
-        this.currentGame = user.currentGame ?? 0;
+        this.notify = user.notify || true;
+        this.maxStreak = user.maxStreak || 0;
+        this.totalGamesPlayed = user.totalGamesPlayed || 0;
+        this.totalWins = user.totalWins || 0;
+        this.currentGame = user.currentGame || 0;
     }
 
     static fromCloud(user: FirebaseFirestore.DocumentData) {
@@ -38,12 +38,12 @@ export default class User {
             streak: user.streak || 0 as number,
             joinedDate: user.joinedDate.toDate() as Date,
             onGame: user.onGame as boolean,
-            tries: user.tries ?? [],
+            tries: user.tries || [],
             notify: user.notify as boolean,
-            maxStreak: user.maxStreak ?? 0 as number,
-            totalGamesPlayed: user.totalGamesPlayed ?? 0 as number,
-            totalWins: user.totalWins ?? 0 as number,
-            currentGame: user.currentGame ?? 0 as number,
+            maxStreak: user.maxStreak || 0 as number,
+            totalGamesPlayed: user.totalGamesPlayed || 0 as number,
+            totalWins: user.totalWins || 0 as number,
+            currentGame: user.currentGame || 0 as number,
         });
     }
 
