@@ -9,8 +9,6 @@ admin.initializeApp({
 const firestore = admin.firestore();
 const Firestore = admin.firestore;
 
-console.log("HEY CHECKING", process.env.BOT_TOKEN);
-
 const token = process.env.BOT_TOKEN ?? "YOUR_BOT_TOKEN";
 
 const bot = new Bot<Context>(token);

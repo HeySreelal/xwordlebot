@@ -9,6 +9,11 @@ export default class User {
     joinedDate: Date;
     onGame: boolean;
     tries: string[];
+    notify: boolean;
+    maxStreak: number;
+    totalGamesPlayed: number;
+    totalWins: number;
+    currentGame: number;
 
     constructor (user: U) {
         this.id = user.id;
@@ -18,6 +23,11 @@ export default class User {
         this.joinedDate = user.joinedDate;
         this.tries = user.tries;
         this.onGame = user.onGame;
+        this.notify = user.notify ?? true;
+        this.maxStreak = user.maxStreak ?? 0;
+        this.totalGamesPlayed = user.totalGamesPlayed ?? 0;
+        this.totalWins = user.totalWins ?? 0;
+        this.currentGame = user.currentGame ?? 0;
     }
 
     static fromCloud(user: FirebaseFirestore.DocumentData) {
@@ -29,6 +39,11 @@ export default class User {
             joinedDate: user.joinedDate.toDate() as Date,
             onGame: user.onGame as boolean,
             tries: user.tries ?? [],
+            notify: user.notify as boolean,
+            maxStreak: user.maxStreak ?? 0 as number,
+            totalGamesPlayed: user.totalGamesPlayed ?? 0 as number,
+            totalWins: user.totalWins ?? 0 as number,
+            currentGame: user.currentGame ?? 0 as number,
         });
     }
 
@@ -41,6 +56,11 @@ export default class User {
             joinedDate: this.joinedDate,
             tries: this.tries,
             onGame: this.onGame,
+            notify: this.notify,
+            maxStreak: this.maxStreak,
+            totalGamesPlayed: this.totalGamesPlayed,
+            totalWins: this.totalWins,
+            currentGame: this.currentGame,
         };
     }
 
@@ -53,6 +73,11 @@ export default class User {
             joinedDate: new Date(),
             tries: [],
             onGame: false,
+            notify: true,
+            maxStreak: 0,
+            totalGamesPlayed: 0,
+            totalWins: 0,
+            currentGame: 0,
         });
     }
 }
@@ -67,4 +92,9 @@ export interface U {
     joinedDate: Date;
     onGame: boolean;
     tries: string[];
+    notify: boolean;
+    maxStreak: number;
+    totalGamesPlayed: number;
+    totalWins: number;
+    currentGame: number;
 }

@@ -7,10 +7,16 @@ import WordleDB from "../services/db";
 export default async function guessHandler(ctx: Context) {
     
     const user = await WordleDB.getUser(ctx.from.id, ctx.from.first_name);
-    const game = await WordleDB.getToday();
+    const game = WordleDB.getToday();
     
     if (!game || !user) {
         return ctx.reply("Something went wrong. Please try again later.");
+    }
+
+    // Just don't mind if the user is not currently playing the game.
+    if (!user.onGame) {
+        console.log("User is not on game");
+        return
     }
     
     const guess = ctx.message.text.toLowerCase().split('');
@@ -26,37 +32,37 @@ export default async function guessHandler(ctx: Context) {
     if (!await wordExists(guess.join(''))) {
         return ctx.reply(`Please enter a valid word!`);
     }
-    
-    // Just don't mind if the user is not currently playing the game.
-    if (!user.onGame) {
-        console.log("User is not on game");
-        return
-    }
+
     const result = getBoxes(game.word, guess);
 
     user.tries.push(ctx.message.text);
     if (game.word == guess.join('')) {
         user.onGame = false;
         user.lastGame = game.id;
+        user.streak++;
+        user.totalWins++;
         if (user.tries.length === 1) {
             await ctx.reply(`Awesome! Just in one try! Nailed it! 🎉`);
         }
-
         await sendShareMessage(ctx, game.word, user.tries, game.id);
 
         await ctx.reply(`You guessed the word!\n\nThe word was <b>${game.word.toUpperCase()}</b>! 🚀`, {
             parse_mode: "HTML"
         });
-        await ctx.reply(`Come back after ${getFormatedDuration(game.next)} for the next word!`);
+        await ctx.reply(`New word showing up in ${getFormatedDuration(game.next)}!`);
+
+        if(user.maxStreak < user.streak) user.maxStreak = user.streak;
+
         user.tries = [];
     } else if (user.tries.length >= 6) {
         user.onGame = false;
         user.lastGame = game.id;
+        user.streak = 0;
         await sendShareMessage(ctx, game.word, user.tries, game.id);
         await ctx.reply(`You lost! The word was <b>${game.word.toUpperCase()}</b>! 💀`, {
             parse_mode: "HTML"
         });
-        await ctx.reply(`Come back after ${getFormatedDuration(game.next)} for the next word!`);
+        await ctx.reply(`New word showing up in ${getFormatedDuration(game.next)}!`);
         user.tries = [];
     } else {
         await ctx.reply(`${result.join(' ')}`);
@@ -98,14 +104,14 @@ export function getBoxes(word: string, guess: string[]): string[] {
 
 const sendShareMessage = async (ctx: Context, word: string, tries: string[], gameId: number) => {
     const grid = resultGrid(word, tries);
-    const resultMessage = `#WordleBot ${gameId} - ${tries.length} / 6\n\n${grid.join('\n')}\n\n@xWordleBot`;
-    await ctx.reply(`<code>${resultMessage}</code>`, {
+    const resultMessage = `\n#WordleBot ${gameId} - ${tries.length} / 6\n\n${grid.join('\n')}\n\n@xWordleBot`;
+    await ctx.reply(`<code>${resultMessage.trim()}</code>`, {
         parse_mode: "HTML",
         reply_markup: {
             inline_keyboard: [
                 [{
                     text: "Share 📩",
-                    url: `https://t.me/share/text?url=https://t.me/xwordlebot&text=%0A${encodeURI(resultMessage)}`
+                    url: `https://t.me/share/url?url=https://t.me/xwordlebot&text=${encodeURIComponent(resultMessage)}`
                 }],
             ],
         }

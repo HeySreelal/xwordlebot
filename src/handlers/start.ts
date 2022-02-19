@@ -4,7 +4,7 @@ import WordleDB from "../services/db";
 
 export default async function startHandler(ctx: Context) {
     const user = await WordleDB.getUser(ctx.from.id, ctx.from.first_name);
-    const game = await WordleDB.getToday();
+    const game = WordleDB.getToday();
 
     if (!game || !user) {
         ctx.replyWithChatAction("typing");
@@ -16,14 +16,23 @@ export default async function startHandler(ctx: Context) {
         return ctx.reply(`Excited? But, you've already played today! Come back after ${getFormatedDuration(game.next)} for the next word! 👀`);
     }
 
-    if (user.tries.length > 5) {
+    // If the user is already playing the game, and the game is not over.
+    if (user.onGame && user.currentGame == game.id) {
         ctx.replyWithChatAction("typing");
-        return ctx.reply(`You have exceeded the maximum number of tries!`);
+        return ctx.reply("You are already playing the game. Shoot the guesses. 😇");
     }
 
     ctx.replyWithChatAction("typing");
     await ctx.reply(`Let's start the game, shoot your first guess!\n\nMeanwhile, send <code>/help</code> anytime if you want to check instructions.`, {
         parse_mode: "HTML"
     });
-    await WordleDB.startGame(user.id);
+
+    user.onGame = true;
+    // if the user is not playing today's game, then clear tries.
+    if (user.currentGame != game.id) {
+        user.currentGame = game.id;
+        user.tries = [];
+        user.totalGamesPlayed++;
+    }
+    await WordleDB.updateUser(user);
 }

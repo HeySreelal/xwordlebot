@@ -17,7 +17,7 @@ export default class TodaysWordle {
 
     static fromJson(data: any): TodaysWordle {
         return new TodaysWordle(
-            data.word,
+            (data.word as string).toLowerCase(),
             data.id,
             new Date(data.date),
             new Date(data.next),

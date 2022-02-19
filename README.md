@@ -1,8 +1,12 @@
 # Wordle Bot
 
+## Give a try! [@xWordleBot](https://t.me/xwordlebot).
+
 This is a simple bot inspired by [Wordle game](https://www.nytimes.com/games/wordle/index.html). 
 
-The bot is entirely written in TypeScript.
+The bot is entirely written in TypeScript. Thanks to [grammY](https://grammy.dev/) Telegram Bot framework. And to [datamuse](https://www.datamuse.com/api/) API for word check.
+
+<hr>
 
 ## Setup
 
@@ -15,3 +19,13 @@ The bot is entirely written in TypeScript.
 5. Run ```npm run build``` - Make sure you have installed the latest version of [TypeScript](https://www.typescriptlang.org/download)
 6. Run ```npm start``` to start the bot
 
+
+## Words
+You can customize the words to be used by the bot by editing the [`src/config/words.ts` file](./src/config/words.ts). 
+
+<hr>
+
+## Thanks ❤️
+Show some love by sharing the bot with your friends!
+
+[Twitter](https://twitter.com/HeySreelal) | [Xooniverse](https://t.me/xooniverse)

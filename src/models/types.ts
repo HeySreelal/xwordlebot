@@ -1,5 +1,7 @@
 export default interface WordleConfig {
-    players: Player[];
+    players: {
+        [id: number]: Player,
+    };
     totalPlayers: number;
 }
 

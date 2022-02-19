@@ -6,12 +6,16 @@ import WordleDB from "../services/db";
 import { sleep } from "./utils";
 import bot from "../config/config";
 
-export default function updateWord () {
+export const gameNo = (): number =>  {
     const launchDate = new Date(2022, 1, 19, 0, 0, 0, 0);
     const now = new Date();
     const diff = launchDate.valueOf() - now.valueOf();
-    const days = Math.abs(Math.floor(diff / dayInMs));
-    
+    return Math.abs(Math.floor(diff / dayInMs));
+}
+
+export default function updateWord () {
+
+    const days = gameNo();
     // update today.json with the new word
     const today = new Date();
     const todayJson = JSON.parse(fs.readFileSync(`${__dirname}/../../game.json`, 'utf8'));
@@ -32,8 +36,9 @@ export default function updateWord () {
 
 const notifyPlayers = async () => {
     const confs = await WordleDB.getConfigs();
-    const players = confs.players.filter(p => p.notify);
-    for (const player of players) {
+    const peeps = Object.values(confs.players);
+    const subs = peeps.filter(p => p.notify);
+    for (const player of subs) {
         await sleep(2000);
         await bot.api.sendMessage(player.id, `Hey, time to play! New word is here! 👀`)
     }
