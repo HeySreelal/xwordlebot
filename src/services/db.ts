@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { firestore } from "../config/config";
+import { Firestore, firestore } from "../config/config";
 import greet from "../helpers/greet";
 import TodaysWordle from "../models/today";
 import WordleConfig from "../models/types";
@@ -27,7 +27,10 @@ export default class WordleDB {
                     id: userId,
                     notify: true,
                 };
-                tr.update(firestore.doc("game/config"), { players });
+                tr.update(firestore.doc("game/config"), { 
+                    players,
+                    totalPlayers: Firestore.FieldValue.increment(1),
+                });
             })
             return user;
         } catch (err) {
