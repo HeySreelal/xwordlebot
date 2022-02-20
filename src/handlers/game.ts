@@ -5,10 +5,10 @@ import { guessPrompt, resultGrid } from "../helpers/utils";
 import WordleDB from "../services/db";
 
 export default async function guessHandler(ctx: Context) {
-    
+
     const user = await WordleDB.getUser(ctx.from.id, ctx.from.first_name);
     const game = WordleDB.getToday();
-    
+
     if (!game || !user) {
         return ctx.reply("Something went wrong. Please try again later.");
     }
@@ -18,13 +18,13 @@ export default async function guessHandler(ctx: Context) {
         console.log("User is not on game");
         return
     }
-    
+
     const guess = ctx.message.text.toLowerCase().split('');
 
     if (guess.length != 5) {
         return ctx.reply(`Your guess must be 5 letters long!`);
     }
-    
+
     if (guess.some(letter => !/[a-z]/.test(letter))) {
         return ctx.reply(`Your guess must be only letters!`);
     }
@@ -35,7 +35,8 @@ export default async function guessHandler(ctx: Context) {
 
     const result = getBoxes(game.word, guess);
 
-    user.tries.push(ctx.message.text);
+    user.tries.push(guess.join(''));
+
     if (game.word == guess.join('')) {
         user.onGame = false;
         user.lastGame = game.id;
@@ -51,7 +52,7 @@ export default async function guessHandler(ctx: Context) {
         });
         await ctx.reply(`New word showing up in ${getFormatedDuration(game.next)}!`);
 
-        if(user.maxStreak < user.streak) user.maxStreak = user.streak;
+        if (user.maxStreak < user.streak) user.maxStreak = user.streak;
 
         user.tries = [];
     } else if (user.tries.length >= 6) {

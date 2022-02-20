@@ -27,7 +27,7 @@ export default class WordleDB {
                     id: userId,
                     notify: true,
                 };
-                tr.update(firestore.doc("game/config"), { 
+                tr.update(firestore.doc("game/config"), {
                     players,
                     totalPlayers: Firestore.FieldValue.increment(1),
                 });
