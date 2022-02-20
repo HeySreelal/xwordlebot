@@ -25,12 +25,14 @@ export default function updateWord () {
     game.next = new Date(launchDate.getTime() + days * dayInMs);
     game.id = days;
 
+    const msUptoNext = game.next.getTime() - today.getTime();
+
     fs.writeFileSync(`${__dirname}/../../game.json`, JSON.stringify(game, null, 2));
 
     setTimeout(() => {
         updateWord();
         notifyPlayers();
-    }, dayInMs);
+    }, msUptoNext);
 }
 
 const notifyPlayers = async () => {
