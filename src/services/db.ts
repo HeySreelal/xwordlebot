@@ -1,11 +1,14 @@
 import { readFileSync } from "fs";
 import { Firestore, firestore } from "../config/config";
 import greet from "../helpers/greet";
+import { doLog } from "../helpers/utils";
 import TodaysWordle from "../models/today";
 import WordleConfig from "../models/types";
 import User from "../models/user";
 
 export default class WordleDB {
+    static configPath: string = "game/config";
+
     static getUser = async (userId: number, userName: string): Promise<User> => {
         const userDoc = await firestore.doc(`players/${userId}`).get();
         if (!userDoc.exists) {
@@ -21,13 +24,13 @@ export default class WordleDB {
         try {
             await firestore.doc(`players/${userId}`).set(user.toCloud());
             await firestore.runTransaction(async tr => {
-                const doc = await tr.get(firestore.doc("game/config"));
+                const doc = await tr.get(firestore.doc(this.configPath));
                 const players = doc.data().players;
                 players[userId] = {
                     id: userId,
                     notify: true,
                 };
-                tr.update(firestore.doc("game/config"), {
+                tr.update(firestore.doc(this.configPath), {
                     players,
                     totalPlayers: Firestore.FieldValue.increment(1),
                 });
@@ -53,23 +56,56 @@ export default class WordleDB {
     }
 
     static getConfigs = async (): Promise<WordleConfig> => {
-        const configs = await firestore.doc("game/config").get();
+        const configs = await firestore.doc(this.configPath).get();
         return configs.data() as WordleConfig;
     }
 
     static toggleNotification = async (user: number, shouldNotify: boolean): Promise<void> => {
         try {
             await firestore.runTransaction(async tr => {
-                const doc = await tr.get(firestore.doc("game/config"));
+                const doc = await tr.get(firestore.doc(this.configPath));
                 const players = doc.data().players;
                 players[user].notify = shouldNotify;
-                tr.update(firestore.doc("game/config"), { players });
+                tr.update(firestore.doc(this.configPath), { players });
             });
             await firestore.doc(`players/${user}`).update({
                 notify: true,
             });
         } catch (err) {
             console.log(err);
+        }
+    }
+
+    static updateConfigs = async (configs: WordleConfig): Promise<void> => {
+        try {
+            await firestore.doc(this.configPath).update(configs);
+        } catch (err) {
+            console.log("Error while updating configs: ", err);
+        }
+    }
+
+    static updateBlocked = async (users: number[]): Promise<void> => {
+        try {
+            const batch = firestore.batch();
+            const configDoc = firestore.doc(this.configPath);
+            // increment blocked players count
+            batch.update(configDoc, {
+                blockedPlayers: Firestore.FieldValue.increment(users.length),
+            });
+
+            // loop through blocked peeps, and update their notify to false
+            for (const user of users) {
+                const doc = firestore.doc(`players/${user}`);
+                batch.update(doc, {
+                    notify: false,
+                });
+            }
+            await batch.commit();
+
+            // log it
+            await doLog(`Updated new ${users.length} blocked users!`);
+        } catch (err) {
+            doLog(`Error while updating blocked: ${err}`);
         }
     }
 }

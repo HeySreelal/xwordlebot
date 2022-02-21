@@ -3,6 +3,7 @@ export default interface WordleConfig {
         [id: number]: Player,
     };
     totalPlayers: number;
+    blockedPlayers: number;
 }
 
 interface Player {

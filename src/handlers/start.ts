@@ -1,5 +1,7 @@
 import { Context } from "grammy";
+import { errors, excitedMessages, inGameMessages, letsStart } from "../config/strings";
 import { getFormatedDuration } from "../helpers/date";
+import { random } from "../helpers/utils";
 import WordleDB from "../services/db";
 
 export default async function startHandler(ctx: Context) {
@@ -8,22 +10,24 @@ export default async function startHandler(ctx: Context) {
 
     if (!game || !user) {
         ctx.replyWithChatAction("typing");
-        return ctx.reply("Something went wrong. Please try again later.");
+        return ctx.reply(errors.something_went_wrong);
     }
 
     if (game.id === user.lastGame) {
         ctx.replyWithChatAction("typing");
-        return ctx.reply(`Excited? But, you've already played today! Come back after ${getFormatedDuration(game.next)} for the next word! 👀`);
+        const msg = random(excitedMessages)
+            .replace('{TIME}', getFormatedDuration(game.next));
+        return ctx.reply(msg);
     }
 
     // If the user is already playing the game, and the game is not over.
     if (user.onGame && user.currentGame == game.id) {
         ctx.replyWithChatAction("typing");
-        return ctx.reply("You are already playing the game. Shoot the guesses. 😇");
+        return ctx.reply(inGameMessages.already);
     }
 
     ctx.replyWithChatAction("typing");
-    await ctx.reply(`Let's start the game, shoot your first guess!\n\nMeanwhile, send <code>/help</code> anytime if you want to check instructions.`, {
+    await ctx.reply(letsStart, {
         parse_mode: "HTML"
     });
 

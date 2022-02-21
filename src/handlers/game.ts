@@ -1,4 +1,5 @@
 import { Context } from "grammy";
+import { errors } from "../config/strings";
 import { getFormatedDuration } from "../helpers/date";
 import { wordExists } from "../helpers/dictionary";
 import { guessPrompt, resultGrid } from "../helpers/utils";
@@ -10,13 +11,13 @@ export default async function guessHandler(ctx: Context) {
     const game = WordleDB.getToday();
 
     if (!game || !user) {
-        return ctx.reply("Something went wrong. Please try again later.");
+        return ctx.reply(errors.something_went_wrong);
     }
 
     // Just don't mind if the user is not currently playing the game.
     if (!user.onGame) {
         console.log("User is not on game");
-        return
+        return;
     }
 
     const guess = ctx.message.text.toLowerCase().split('');

@@ -1,4 +1,5 @@
 import { Context } from "grammy";
+import { errors } from "../config/strings";
 import { getFormatedDuration } from "../helpers/date";
 import { gameNo } from "../helpers/word_updater";
 import WordleDB from "../services/db";
@@ -6,14 +7,14 @@ import WordleDB from "../services/db";
 export async function nextWord(ctx: Context) {
     const game = WordleDB.getToday();
     ctx.replyWithChatAction("typing");
-    await ctx.reply(`New word showing up in ${getFormatedDuration(game.next)}!`);
+    await ctx.reply(`New word showing up on ${getFormatedDuration(game.next)}!`);
 }
 
 export async function profileHandler(ctx: Context) {
     const user = await WordleDB.getUser(ctx.from.id, ctx.from.first_name);
 
     if (!user) {
-        return ctx.reply("Something went wrong. Please try again later.");
+        return ctx.reply(errors.something_went_wrong);
     }
 
     ctx.replyWithChatAction("typing");

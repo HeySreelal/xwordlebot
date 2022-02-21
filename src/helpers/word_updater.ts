@@ -3,8 +3,9 @@ import * as fs from "fs";
 import TodaysWordle from "../models/today";
 import words from "../config/words";
 import WordleDB from "../services/db";
-import { sleep } from "./utils";
+import { doLog, random, sleep } from "./utils";
 import bot, { launchDate } from "../config/config";
+import { errors, notificationMsgs } from "../config/strings";
 
 export const gameNo = (): number => {
     const now = new Date();
@@ -23,7 +24,6 @@ export default function updateWord() {
     game.word = words[days];
     game.date = today;
     game.next = new Date(launchDate.getTime() + days * dayInMs);
-    game.id = days;
 
     const msUptoNext = game.next.getTime() - today.getTime();
 
@@ -39,12 +39,24 @@ const notifyPlayers = async () => {
     const confs = await WordleDB.getConfigs();
     const peeps = Object.values(confs.players);
     const subs = peeps.filter(p => p.notify);
+    const config = await WordleDB.getConfigs();
+    let blockedPeeps = [];
     for (const player of subs) {
         await sleep(2000);
-        await bot.api.sendMessage(player.id, `Hey, time to play! New Wordle is here! 👀`)
+        // Try sending the notification message, if it fails on blocked error -> unsubscribe the user
+        await bot.api.sendMessage(player.id, random(notificationMsgs))
             .catch(err => {
-                // ignore any errors while sending notification messages
-                console.error(err);
+                if (err.description === errors.blocked) {
+                    doLog(`Unsubscribing [BLOCKED] Peep #${player.id}.`);
+                    config.players[player.id].notify = false;
+                    blockedPeeps.push(player.id);
+                    config.blockedPlayers++;
+                }
             });
+    }
+
+    if (blockedPeeps.length > 0) {
+        await WordleDB.updateConfigs(config);
+        await WordleDB.updateBlocked(blockedPeeps);
     }
 }

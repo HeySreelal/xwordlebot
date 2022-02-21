@@ -1,4 +1,5 @@
 import { Context } from "grammy";
+import { errors, inGameMessages } from "../config/strings";
 import { getFormatedDuration } from "../helpers/date";
 import WordleDB from "../services/db";
 
@@ -7,11 +8,11 @@ export default async function quitHandler(ctx:Context) {
     const user = await  WordleDB.getUser(ctx.from.id, ctx.from.first_name);
 
     if (!game || !user) {
-        return ctx.reply("Something went wrong. Please try again later.");
+        return ctx.reply(errors.something_went_wrong);
     }
 
     if (!user.onGame) {
-        return ctx.reply("You are not currently playing the game. 😇");
+        return ctx.reply(inGameMessages.notOnGame);
     }
 
     user.onGame = false;
@@ -25,5 +26,5 @@ export default async function quitHandler(ctx:Context) {
     await ctx.reply(`The word was <b>${game.word.toUpperCase()}</b>!`, {
         parse_mode: "HTML"
     });
-    await ctx.reply(`See ya with the next word in ${getFormatedDuration(game.next)}!`);
+    await ctx.reply(`See ya with the next word on ${getFormatedDuration(game.next)}!`);
 }

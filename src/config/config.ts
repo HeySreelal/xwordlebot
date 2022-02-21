@@ -10,10 +10,10 @@ const firestore = admin.firestore();
 const Firestore = admin.firestore;
 
 const token = process.env.BOT_TOKEN || "YOUR_BOT_TOKEN";
+const logsChannel = process.env.LOGS || "LOGS_CHANNEL_ID";
 
 const bot = new Bot<Context>(token);
 const launchDate = new Date(2022, 1, 19, 12, 0, 0, 0);
 
-
 export default bot;
-export { firestore, Firestore, launchDate };
+export { firestore, Firestore, launchDate , logsChannel };
