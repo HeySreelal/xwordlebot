@@ -25,6 +25,9 @@ You can customize the words to be used by the bot by editing the [`src/config/wo
 
 <hr>
 
+## TODOs: 
+- [ ] Add error handlers
+
 ## Thanks ❤️
 Show some love by sharing the bot with your friends!
 

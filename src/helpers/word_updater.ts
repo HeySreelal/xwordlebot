@@ -6,13 +6,13 @@ import WordleDB from "../services/db";
 import { sleep } from "./utils";
 import bot, { launchDate } from "../config/config";
 
-export const gameNo = (): number =>  {
+export const gameNo = (): number => {
     const now = new Date();
     const diff = launchDate.valueOf() - now.valueOf();
     return Math.abs(Math.floor(diff / dayInMs));
 }
 
-export default function updateWord () {
+export default function updateWord() {
     const days = gameNo();
     // update today.json with the new word
     const today = new Date();
@@ -41,7 +41,10 @@ const notifyPlayers = async () => {
     const subs = peeps.filter(p => p.notify);
     for (const player of subs) {
         await sleep(2000);
-        await bot.api.sendMessage(player.id, `Hey, time to play! New word is here! 👀`)
+        await bot.api.sendMessage(player.id, `Hey, time to play! New Wordle is here! 👀`)
+            .catch(err => {
+                // ignore any errors while sending notification messages
+                console.error(err);
+            });
     }
 }
-
