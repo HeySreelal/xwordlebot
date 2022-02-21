@@ -40,18 +40,21 @@ const notifyPlayers = async () => {
     const peeps = Object.values(confs.players);
     const subs = peeps.filter(p => p.notify);
     const config = await WordleDB.getConfigs();
+
     let blockedPeeps = [];
+    let failedCount = 0;
+
     for (const player of subs) {
         await sleep(2000);
         // Try sending the notification message, if it fails on blocked error -> unsubscribe the user
         await bot.api.sendMessage(player.id, random(notificationMsgs))
             .catch(err => {
                 if (err.description === errors.blocked) {
-                    doLog(`Unsubscribing [BLOCKED] Peep #${player.id}.`);
                     config.players[player.id].notify = false;
                     blockedPeeps.push(player.id);
                     config.blockedPlayers++;
                 }
+                failedCount++;
             });
     }
 
@@ -59,4 +62,6 @@ const notifyPlayers = async () => {
         await WordleDB.updateConfigs(config);
         await WordleDB.updateBlocked(blockedPeeps);
     }
+
+    doLog(`Sent ${subs.length} notifications to ${subs.length - failedCount} users. And failed to send to ${failedCount} users.`);
 }

@@ -37,7 +37,7 @@ export default class WordleDB {
             })
             return user;
         } catch (err) {
-            console.log(err);
+            doLog(`Error [DB/onBoardUser]: ${err.message}`);
             return;
         }
     }
@@ -51,7 +51,7 @@ export default class WordleDB {
         try {
             await firestore.doc(`players/${user.id}`).update(user.toCloud());
         } catch (err) {
-            console.log(err);
+            doLog(`Error [DB/updateUser]: ${err.message}`);
         }
     }
 
@@ -72,7 +72,7 @@ export default class WordleDB {
                 notify: true,
             });
         } catch (err) {
-            console.log(err);
+            doLog(`Error [DB/toggleNotification]: ${err.message}`);
         }
     }
 
@@ -80,7 +80,7 @@ export default class WordleDB {
         try {
             await firestore.doc(this.configPath).update(configs);
         } catch (err) {
-            console.log("Error while updating configs: ", err);
+            doLog(`Error while updating configs: ${err}`);
         }
     }
 

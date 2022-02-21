@@ -22,7 +22,7 @@ export async function profileHandler(ctx: Context) {
         `🎰 Total Games Played: <b>${user.totalGamesPlayed}</b>\n\n` +
         `🔥 Current Streak: <b>${user.streak}</b>\n\n` + 
         `🎆 Highest Streak: <b>${user.maxStreak}</b>\n\n` +
-        `💎 Win Percentage: <b>${user.totalWins * 100 / gameNo()}</b>\n\n` +
+        `💎 Win Percentage: <b>${(user.totalWins * 100 / gameNo()).toFixed(2)}</b>\n\n` +
         `#MyWordle`, {
         parse_mode: "HTML"
     });
