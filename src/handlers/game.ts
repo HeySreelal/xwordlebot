@@ -1,8 +1,8 @@
 import { Context } from "grammy";
-import { errors } from "../config/strings";
+import { errors, notOnGameMessages } from "../config/strings";
 import { getFormatedDuration } from "../helpers/date";
 import { wordExists } from "../helpers/dictionary";
-import { guessPrompt, resultGrid } from "../helpers/utils";
+import { guessPrompt, random, resultGrid } from "../helpers/utils";
 import WordleDB from "../services/db";
 
 export default async function guessHandler(ctx: Context) {
@@ -16,7 +16,7 @@ export default async function guessHandler(ctx: Context) {
 
     // Just don't mind if the user is not currently playing the game.
     if (!user.onGame) {
-        console.log("User is not on game");
+        ctx.reply(random(notOnGameMessages));
         return;
     }
 

@@ -70,6 +70,15 @@ Show some love by sharing the bot with your friends!
 <a href="https://twitter.com/HeySreelal">Twitter</a> | <a href="https://t.me/xooniverse">Xooniverse</a>
 `;
 
+const notOnGameMessages = [
+    "You are not currently playing the game. 😇 Send /start to start playing. 🤖",
+    "Oops! You're not on a game. Send /start to start play today's Wordle! 🤖",
+    "First, send /start to start playing today's Wordle! 🤖",
+    "I didn't get what you said. Send /start to start playing today's Wordle! 🤖",
+    "Could you rephrase that, please? Send /help for help message, or /start to start playing. 👀",
+    "Let's start the game or need some help? Send /help for help message, or /start to start playing. 😇",
+];
+
 
 export {
     notificationMsgs,
@@ -79,4 +88,5 @@ export {
     inGameMessages,
     helpMessage,
     aboutMessage,
+    notOnGameMessages,
 }
