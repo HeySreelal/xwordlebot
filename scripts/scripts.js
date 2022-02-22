@@ -8,7 +8,7 @@ const db = admin.firestore();
 /**
  * Include the last game ID in the config.
  *
- * Trying to setup notifications only for those people who played the preious game. 
+ * Trying to setup notifications only for those people who played the preious game.
  * @returns {Promise<boolean>}
  */
 async function includeLastGameIDinConfig() {
@@ -25,7 +25,20 @@ async function includeLastGameIDinConfig() {
         return false;
     }
 }
+async function succeedPeople() {
+    try {
+        const snapshot =  await db.collection("players")
+                 .where("lastGame", "==", 3)
+                 .get();
+        console.log("Cound of people who won: ", snapshot.docs.length);
+        return true;
+    } catch (err) {
+        console.log("error", err)
+        return false;
+    }
+}
 
 module.exports = {
     includeLastGameIDinConfig,
+    succeedPeople,
 }

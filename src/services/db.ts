@@ -2,6 +2,7 @@ import { readFileSync } from "fs";
 import { Firestore, firestore } from "../config/config";
 import greet from "../helpers/greet";
 import { doLog } from "../helpers/utils";
+import { gameNo } from "../helpers/word_updater";
 import TodaysWordle from "../models/today";
 import WordleConfig from "../models/types";
 import User from "../models/user";
@@ -109,17 +110,24 @@ export default class WordleDB {
         }
     }
 
-    static updateLastGameInConfig = async (user: number, gameNo: number): Promise<void> => {
+    static updateLastGameInConfig = async (user: number, no: number): Promise<void> => {
         try {
             await firestore.runTransaction(async tr => {
                 const doc = firestore.doc("game/config");
                 const data = await tr.get(doc);
                 const config = data.data() as WordleConfig;
-                config.players[user].lastGame = gameNo;
+                config.players[user].lastGame = no;
                 tr.update(doc, config);
             });
         } catch (err) {
             doLog(`Error while updating last game in config: ${err}`);
         }
+    }
+
+    static async succeedPeople(): Promise<number> {
+        const snapshot = await firestore.collection("players")
+            .where("lastGame", "==", gameNo() - 1)
+            .get();
+        return snapshot.docs.length;
     }
 }

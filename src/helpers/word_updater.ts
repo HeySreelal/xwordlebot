@@ -6,6 +6,7 @@ import WordleDB from "../services/db";
 import { doLog, random, sleep } from "./utils";
 import bot, { launchDate } from "../config/config";
 import { errors, notificationMsgs } from "../config/strings";
+import WordleAnalytics from "../services/analytics";
 
 export const gameNo = (): number => {
     const now = new Date();
@@ -38,7 +39,16 @@ export default function updateWord() {
 const notifyPlayers = async () => {
     const confs = await WordleDB.getConfigs();
     const peeps = Object.values(confs.players);
-    const subs = peeps.filter(p => p.notify);
+
+    // Send daily analytics
+    WordleAnalytics.sendDaily(confs);
+    
+    // Player must have enabled notifications
+    // And should be played last game: 
+    // what's the point of notifying them if they haven't played the game from the last notification?
+    // Isn't that spamming? :)
+    const subs = peeps.filter(p => p.notify && p.lastGame != gameNo() - 1);
+    
     const config = await WordleDB.getConfigs();
 
     let blockedPeeps = [];
