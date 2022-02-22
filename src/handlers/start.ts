@@ -1,9 +1,15 @@
 import { Context } from "grammy";
-import { errors, excitedMessages, inGameMessages, letsStart } from "../config/strings";
+import { errors, excitedMessages, inGameMessages } from "../config/strings";
 import { getFormatedDuration } from "../helpers/date";
 import { random } from "../helpers/utils";
 import WordleDB from "../services/db";
 
+/**
+ * **startHandler**
+ * 
+ * Handler for the /start command.
+ * @param {Context} ctx - Telegram context
+ */
 export default async function startHandler(ctx: Context) {
     const user = await WordleDB.getUser(ctx.from.id, ctx.from.first_name);
     const game = WordleDB.getToday();
@@ -27,7 +33,7 @@ export default async function startHandler(ctx: Context) {
     }
 
     ctx.replyWithChatAction("typing");
-    await ctx.reply(letsStart, {
+    await ctx.reply(inGameMessages.letsStart, {
         parse_mode: "HTML"
     });
 
