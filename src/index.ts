@@ -1,5 +1,4 @@
 import * as dotenv from 'dotenv';
-import { BotError, Context, GrammyError } from 'grammy';
 dotenv.config({
     path: `${__dirname}/../.env`
 });
