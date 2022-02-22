@@ -40,7 +40,7 @@ export const sleep = (ms: number) => {
 
 // Log a message to the bot's logs channel
 export async function doLog(msg: string) {
-    await bot.api.sendMessage(logsChannel, msg);
+    await bot.api.sendMessage(logsChannel, msg, { parse_mode: "HTML" });
     // just in case to avoid Too Many Requests
     await sleep(1000);
 }
