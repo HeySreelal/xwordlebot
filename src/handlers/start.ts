@@ -44,5 +44,6 @@ export default async function startHandler(ctx: Context) {
         user.tries = [];
         user.totalGamesPlayed++;
     }
+    await WordleDB.updateLastGameInConfig(user.id, game.id);
     await WordleDB.updateUser(user);
 }

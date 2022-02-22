@@ -9,4 +9,5 @@ export default interface WordleConfig {
 interface Player {
     id: number;
     notify: boolean;
+    lastGame: number;
 }

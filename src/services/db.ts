@@ -108,4 +108,18 @@ export default class WordleDB {
             doLog(`Error while updating blocked: ${err}`);
         }
     }
+
+    static updateLastGameInConfig = async (user: number, gameNo: number): Promise<void> => {
+        try {
+            await firestore.runTransaction(async tr => {
+                const doc = firestore.doc("game/config");
+                const data = await tr.get(doc);
+                const config = data.data() as WordleConfig;
+                config.players[user].lastGame = gameNo;
+                tr.update(doc, config);
+            });
+        } catch (err) {
+            doLog(`Error while updating last game in config: ${err}`);
+        }
+    }
 }
