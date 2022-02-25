@@ -30,6 +30,7 @@ export default class WordleDB {
                 players[userId] = {
                     id: userId,
                     notify: true,
+                    lastGame: gameNo(),
                 };
                 tr.update(firestore.doc(this.configPath), {
                     players,
