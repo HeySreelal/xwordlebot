@@ -121,7 +121,7 @@ export default class WordleDB {
                 tr.update(doc, config);
             });
         } catch (err) {
-            doLog(`Error while updating last game in config: ${err}`);
+            doLog(`Error for User <code>${user}</code> while updating last game in config: ${err}`);
         }
     }
 
