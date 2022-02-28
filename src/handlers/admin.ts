@@ -8,7 +8,7 @@ export default class AdminHandlers {
     static async getAnalytics(ctx: Context): Promise<void> {
         try {
             const id = ctx.from.id;
-            if (!admins.includes(id.toString())) {
+            if (!admins.includes(id)) {
                 await ctx.reply(`You are not authorized to use this command. 👨🏻‍💻`);
                 return;
             }
