@@ -1,4 +1,5 @@
 import { Context } from "grammy";
+import handleErrorWithEase from "../helpers/error_logger";
 import WordleDB from "../services/db";
 
 const notificationHandler = async (ctx: Context) => {
@@ -12,11 +13,12 @@ const notificationHandler = async (ctx: Context) => {
                 ],
             ],
         }
-    });
+    }).catch(err => handleErrorWithEase(err, ctx, "notificationHandler"));
 }
 
 export const toggleNotification = async (ctx: Context, shouldNotify: boolean) => {
-    await WordleDB.toggleNotification(ctx.from.id, shouldNotify);
+    try {
+        await WordleDB.toggleNotification(ctx.from.id, shouldNotify);
     ctx.replyWithChatAction("typing");
     await ctx.reply(`You will ${shouldNotify ? "receive" : "not receive"} notifications when new word is available.`);
     await ctx.answerCallbackQuery("Notification settings updated.");
@@ -30,7 +32,10 @@ export const toggleNotification = async (ctx: Context, shouldNotify: boolean) =>
                 ]
             ]   
         }
-    })
+    });
+    } catch (err) {
+        handleErrorWithEase(err, ctx, "toggleNotification");
+    }
 }
 
 export default notificationHandler;

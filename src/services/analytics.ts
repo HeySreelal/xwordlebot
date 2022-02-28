@@ -5,6 +5,11 @@ import WordleDB from "./db";
 
 export default class WordleAnalytics {
     static async sendDaily(config: WordleConfig) {
+        const msg = await this.getDaily(config);
+        await doLog(msg);
+    }
+
+    static async getDaily(config: WordleConfig) {
         const peeps = Object.values(config.players);
         const playedCount = peeps.filter(e => e.lastGame == gameNo() - 1).length;
         const succeedCount = await WordleDB.succeedPeople();
@@ -12,7 +17,7 @@ export default class WordleAnalytics {
         const blockedCount = config.blockedPlayers;
         const totalCount = peeps.length;
 
-        const msg = `<b>Wordle Analytics</b> 📊` +
+        return `<b>Wordle Analytics</b> 📊` +
             `\n\n<b>Game No:</b> ${gameNo() - 1}` +
             `\n\n<b>Total Players:</b> ${totalCount}` +
             `\n<b>Played:</b> ${playedCount}` +
@@ -20,7 +25,5 @@ export default class WordleAnalytics {
             `\n<b>Half Way:</b> ${failedCount}` +
             `\n<b>Blocked:</b> ${blockedCount}` +
             `\n\n#Analytics 📊`;
-
-        await doLog(msg);
     }
 }

@@ -5,6 +5,7 @@ dotenv.config({
 
 import bot from './config/config';
 import { errors } from './config/strings';
+import AdminHandlers from './handlers/admin';
 import callbackHandler from './handlers/callbacks';
 import { nextWord, profileHandler } from './handlers/etc';
 import guessHandler from './handlers/game';
@@ -22,14 +23,15 @@ bot.command("about", aboutHandler);
 bot.command("next", nextWord);
 bot.command("quit", quitHandler);
 bot.command("profile", profileHandler);
-
+bot.command("analytics", AdminHandlers.getAnalytics)
 bot.on(":text", guessHandler);
 bot.on("callback_query:data", callbackHandler);
 
 // Expect the unexpected errors :)
 bot.catch((err) => {
-    doLog(`Error: ${err.message}`);
-    err.ctx.reply(errors.something_went_wrong);
+    const chat = err.ctx.chat.id;
+    doLog(`Error for User <code>${chat}</code>: ${err.message}`);
+    if(chat) err.ctx.reply(errors.something_went_wrong);
 });
 
 // Start bot

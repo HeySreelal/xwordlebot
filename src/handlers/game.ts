@@ -2,75 +2,80 @@ import { Context } from "grammy";
 import { errors, notOnGameMessages } from "../config/strings";
 import { getFormatedDuration } from "../helpers/date";
 import { wordExists } from "../helpers/dictionary";
+import handleErrorWithEase from "../helpers/error_logger";
 import { guessPrompt, random, resultGrid } from "../helpers/utils";
 import WordleDB from "../services/db";
 
 export default async function guessHandler(ctx: Context) {
+    try {
 
-    const user = await WordleDB.getUser(ctx.from.id, ctx.from.first_name);
-    const game = WordleDB.getToday();
+        const user = await WordleDB.getUser(ctx.from.id, ctx.from.first_name);
+        const game = WordleDB.getToday();
 
-    if (!game || !user) {
-        return ctx.reply(errors.something_went_wrong);
-    }
-
-    // Just don't mind if the user is not currently playing the game.
-    if (!user.onGame) {
-        ctx.reply(random(notOnGameMessages));
-        return;
-    }
-
-    const guess = ctx.message.text.toLowerCase().split('');
-
-    if (guess.length != 5) {
-        return ctx.reply(`Your guess must be 5 letters long!`);
-    }
-
-    if (guess.some(letter => !/[a-z]/.test(letter))) {
-        return ctx.reply(`Your guess must be only letters!`);
-    }
-
-    if (!await wordExists(guess.join(''))) {
-        return ctx.reply(`Please enter a valid word!`);
-    }
-
-    const result = getBoxes(game.word, guess);
-
-    user.tries.push(guess.join(''));
-
-    if (game.word == guess.join('')) {
-        user.onGame = false;
-        user.lastGame = game.id;
-        user.streak++;
-        user.totalWins++;
-        if (user.tries.length === 1) {
-            await ctx.reply(`Awesome! Just in one try! Nailed it! 🎉`);
+        if (!game || !user) {
+            return ctx.reply(errors.something_went_wrong);
         }
-        await sendShareMessage(ctx, game.word, user.tries, game.id);
 
-        await ctx.reply(`You guessed the word!\n\nThe word was <b>${game.word.toUpperCase()}</b>! 🚀`, {
-            parse_mode: "HTML"
-        });
-        await ctx.reply(`New word showing up in ${getFormatedDuration(game.next)}!`);
+        // Just don't mind if the user is not currently playing the game.
+        if (!user.onGame) {
+            ctx.reply(random(notOnGameMessages));
+            return;
+        }
 
-        if (user.maxStreak < user.streak) user.maxStreak = user.streak;
+        const guess = ctx.message.text.toLowerCase().split('');
 
-        user.tries = [];
-    } else if (user.tries.length >= 6) {
-        user.onGame = false;
-        user.lastGame = game.id;
-        user.streak = 0;
-        await sendShareMessage(ctx, game.word, user.tries, game.id);
-        await ctx.reply(`You lost! The word was <b>${game.word.toUpperCase()}</b>! 💀`, {
-            parse_mode: "HTML"
-        });
-        await ctx.reply(`New word showing up in ${getFormatedDuration(game.next)}!`);
-        user.tries = [];
-    } else {
-        await ctx.reply(`${result.join(' ')}`);
-        await ctx.reply(guessPrompt(user.tries.length + 1));
+        if (guess.length != 5) {
+            return ctx.reply(`Your guess must be 5 letters long!`);
+        }
+
+        if (guess.some(letter => !/[a-z]/.test(letter))) {
+            return ctx.reply(`Your guess must be only letters!`);
+        }
+
+        if (!await wordExists(guess.join(''))) {
+            return ctx.reply(`Please enter a valid word!`);
+        }
+
+        const result = getBoxes(game.word, guess);
+
+        user.tries.push(guess.join(''));
+
+        if (game.word == guess.join('')) {
+            user.onGame = false;
+            user.lastGame = game.id;
+            user.streak++;
+            user.totalWins++;
+            if (user.tries.length === 1) {
+                await ctx.reply(`Awesome! Just in one try! Nailed it! 🎉`);
+            }
+            await sendShareMessage(ctx, game.word, user.tries, game.id);
+
+            await ctx.reply(`You guessed the word!\n\nThe word was <b>${game.word.toUpperCase()}</b>! 🚀`, {
+                parse_mode: "HTML"
+            });
+            await ctx.reply(`New word showing up in ${getFormatedDuration(game.next)}!`);
+
+            if (user.maxStreak < user.streak) user.maxStreak = user.streak;
+
+            user.tries = [];
+        } else if (user.tries.length >= 6) {
+            user.onGame = false;
+            user.lastGame = game.id;
+            user.streak = 0;
+            await sendShareMessage(ctx, game.word, user.tries, game.id);
+            await ctx.reply(`You lost! The word was <b>${game.word.toUpperCase()}</b>! 💀`, {
+                parse_mode: "HTML"
+            });
+            await ctx.reply(`New word showing up in ${getFormatedDuration(game.next)}!`);
+            user.tries = [];
+        } else {
+            await ctx.reply(`${result.join(' ')}`);
+            await ctx.reply(guessPrompt(user.tries.length + 1));
+        }
+        await WordleDB.updateUser(user);
+    } catch (err) {
+        handleErrorWithEase(err, ctx, 'guessHandler/game');
     }
-    await WordleDB.updateUser(user);
 }
 
 export function getBoxes(word: string, guess: string[]): string[] {
@@ -117,5 +122,5 @@ const sendShareMessage = async (ctx: Context, word: string, tries: string[], gam
                 }],
             ],
         }
-    });
+    }).catch(err => handleErrorWithEase(err, ctx, 'sendShareMessage/game'));
 }
