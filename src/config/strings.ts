@@ -23,6 +23,7 @@ const notificationMsgs = [
 const errors = {
     "blocked": "Forbidden: bot was blocked by the user",
     "something_went_wrong": "Something went wrong. Please try again later.",
+    "cannot_initiate": "Forbidden: bot can't initiate conversation with a user"
 }
 
 /**

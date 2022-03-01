@@ -13,6 +13,7 @@ import helpHandler, { aboutHandler } from './handlers/help';
 import notificationHandler from './handlers/notification';
 import quitHandler from './handlers/quit';
 import startHandler from './handlers/start';
+import handleErrorWithEase from './helpers/error_logger';
 import { doLog } from './helpers/utils';
 import updateWord from './helpers/word_updater';
 
@@ -31,7 +32,8 @@ bot.on("callback_query:data", callbackHandler);
 bot.catch((err) => {
     const chat = err.ctx.chat.id;
     doLog(`Error for User <code>${chat}</code>: ${err.message}`);
-    if(chat) err.ctx.reply(errors.something_went_wrong);
+    if(chat) err.ctx.reply(errors.something_went_wrong)
+        .catch(e => handleErrorWithEase(e, err.ctx, "errors/unexpected"));
 });
 
 // Start bot
