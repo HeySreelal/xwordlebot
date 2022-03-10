@@ -131,4 +131,9 @@ export default class WordleDB {
             .get();
         return snapshot.docs.length;
     }
+
+    static async updateToday(): Promise<void> {
+        const today = this.getToday();
+        firestore.doc("game/today").update(today);
+    }
 }

@@ -4,6 +4,7 @@ import TodaysWordle from "../models/today";
 import words from "../config/words";
 import { launchDate } from "../config/config";
 import notifyPlayers from "./notify";
+import WordleDB from "../services/db";
 
 export const gameNo = (): number => {
     const now = new Date();
@@ -26,7 +27,8 @@ export default function updateWord() {
     const msUptoNext = game.next.getTime() - today.getTime();
 
     fs.writeFileSync(`${__dirname}/../../game.json`, JSON.stringify(game, null, 2));
-
+    WordleDB.updateToday();
+    
     setTimeout(() => {
         updateWord();
         notifyPlayers();

@@ -6,6 +6,12 @@ admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
 });
 const db = admin.firestore();
+
+// FIRESTORE PATHS
+const paths = {
+    config: "game/config",
+};
+
 /**
  * Include the last game ID in the config.
  *
@@ -15,12 +21,12 @@ const db = admin.firestore();
 async function includeLastGameIDinConfig() {
     try {
         const players = await db.collection('players').get();
-        const config = (await db.doc("game/config").get()).data();
+        const config = (await db.doc(paths.config).get()).data();
         for (const player of players.docs) {
             const pd = player.data();
             config.players[pd.id].lastGame = pd.currentGame > pd.lastGame ? pd.currentGame : pd.lastGame;
         }
-        await db.doc("game/config").update(config);
+        await db.doc(paths.config).update(config);
         return true;
     } catch (err) {
         return false;
@@ -84,7 +90,7 @@ function shuffle(array) {
 }
 
 /**
- * Date: 28 February 2021
+ * Date: 28 February 2022
  *
  * Found few logs that goes: ```Error while updating last game in config: TypeError: Cannot set property 'lastGame' of undefined```
  * This is because the last game ID is not updated in the config properly for some players.
@@ -97,9 +103,57 @@ async function fixLastGameInConfig() {
     throw new Error("Not implemented yet.");
 }
 
+/**
+ * Update: 10th March 2022
+ * Firestore document can only hold data upto 1MB. I'm wondering if the details about almost 1400+ users is more than 1MB.
+ * Probably not, but need to check if the `players` field in game/config doc is holding all the details.
+ *
+ * I was not prepared for this 1400+ users. Need to migrate data to each player's own document. Otherwise, I'll surely be messed up.
+ */
+async function compareTotalPlayersCount() {
+    try {
+        const configDoc = await db.doc(paths.config).get();
+        const config = configDoc.data();
+        const players = config.players;
+        console.log(`Total players in config: ${Object.keys(players).length}`);
+        console.log(`Total players count, actual: ${config.totalPlayers}`);
+        return true;
+    } catch (err) {
+        console.log(err);
+        return false;
+    }
+}
+/**
+ * Just migrate :)
+ */
+async function migrateData() {
+    try {
+        const batch = db.batch();
+        const configDoc = await db.doc(paths.config).get();
+        const config = configDoc.data();
+        const players = config.players;
+        for (const playerId in Object.keys(players)) {
+            if (!players[playerId]) {
+                console.log(`Player ${playerId} is not found in config.`);
+            } else {
+                const player = players[playerId];
+                const playerDoc = db.collection(`players/${playerId}`);
+                batch.update(playerDoc, player);
+            }
+        }
+        await batch.commit();
+    } catch (err) {
+        console.log(err);
+        return false;
+    }
+}
+
+
 module.exports = {
     includeLastGameIDinConfig,
     succeedPeople,
     shuffleWordsAndSaveFile,
     fixLastGameInConfig,
+    compareTotalPlayersCount,
+    migrateData,
 }
