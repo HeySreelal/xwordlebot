@@ -134,6 +134,6 @@ export default class WordleDB {
 
     static async updateToday(): Promise<void> {
         const today = this.getToday();
-        firestore.doc("game/today").update(today);
+        firestore.doc("game/today").update({...today});
     }
 }
