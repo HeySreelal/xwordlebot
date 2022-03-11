@@ -1,4 +1,5 @@
 import { Context } from "grammy";
+import { isDebug } from "../config/config";
 import { errors, notOnGameMessages } from "../config/strings";
 import { getFormatedDuration } from "../helpers/date";
 import { wordExists } from "../helpers/dictionary";
@@ -7,8 +8,11 @@ import { guessPrompt, random, resultGrid } from "../helpers/utils";
 import WordleDB from "../services/db";
 
 export default async function guessHandler(ctx: Context) {
+    if(isDebug) {
+        console.log(`${ctx.from.id} is guessing`);
+        return;
+    }
     try {
-
         const user = await WordleDB.getUser(ctx.from.id, ctx.from.first_name);
         const game = WordleDB.getToday();
 

@@ -8,6 +8,7 @@ import { errors } from './config/strings';
 import AdminHandlers from './handlers/admin';
 import callbackHandler from './handlers/callbacks';
 import { nextWord, profileHandler } from './handlers/etc';
+import WordleFilters from './handlers/filters';
 import guessHandler from './handlers/game';
 import helpHandler, { aboutHandler } from './handlers/help';
 import notificationHandler from './handlers/notification';
@@ -24,12 +25,36 @@ bot.command("about", aboutHandler);
 bot.command("next", nextWord);
 bot.command("quit", quitHandler);
 bot.command("profile", profileHandler);
+
+// Admin Commands
+bot.command("mod", AdminHandlers.mod);
 bot.command("analytics", AdminHandlers.getAnalytics)
+bot.hears(/^(📊 Get Analytics)$/, AdminHandlers.getAnalytics);
+
+bot.command("getRelease", AdminHandlers.getReleaseNotes);
+bot.hears(/^(📃 Get Release Notes)$/, AdminHandlers.getReleaseNotes);
+
+bot.command("setRelease", AdminHandlers.askReleasePrompt);
+bot.hears(/^(📝 Set Release Notes)$/, AdminHandlers.askReleasePrompt);
+
+bot.command("release", AdminHandlers.promptRelease);
+bot.hears(/^(🚀 Release)$/, AdminHandlers.promptRelease);
+
+bot.hears(/^(👫 Get Target Players)$/, AdminHandlers.getTargetPlayers);
+bot.hears(/^(👫 Set Target Players)$/, AdminHandlers.askTargetPlayersPrompt);
+
+bot.filter(WordleFilters.adminFilters, WordleFilters.adminFilterHandlers);
+
+
+// On Word Guess
 bot.on(":text", guessHandler);
+
+// On Callback Quries with data
 bot.on("callback_query:data", callbackHandler);
 
 // Expect the unexpected errors :)
 bot.catch((err) => {
+    console.log(err);
     const chat = err.ctx.chat.id;
     doLog(`Error for User <code>${chat}</code>: ${err.message}`);
     if(chat) err.ctx.reply(errors.something_went_wrong)

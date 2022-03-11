@@ -1,10 +1,11 @@
 import { readFileSync } from "fs";
 import { Firestore, firestore } from "../config/config";
 import greet from "../helpers/greet";
+import playerTypesMap from "../helpers/player_types";
 import { doLog } from "../helpers/utils";
 import { gameNo } from "../helpers/word_updater";
 import TodaysWordle from "../models/today";
-import WordleConfig from "../models/types";
+import WordleConfig, { PlayerType } from "../models/types";
 import User from "../models/user";
 
 export default class WordleDB {
@@ -151,5 +152,52 @@ export default class WordleDB {
         } catch (err) {
             doLog(`Error while resetting analytics: ${err}`);
         }
+    }
+
+    static async getReleaseNote(): Promise<string> {
+        const snapshot = await firestore.doc(this.configPath).get();
+        return snapshot.data().releaseNote as string;
+    }
+
+    static async updateReleaseNote(releaseNote: string): Promise<void> {
+        try {
+            await firestore.doc(this.configPath).update({
+                releaseNote,
+            });
+            doLog(`Updated release note to ${releaseNote}`);
+        } catch (err) {
+            doLog(`Error while updating release note: ${err}`);
+        }
+    }
+
+    static async getTargetPlayers(): Promise<string> {
+        return (await this.getConfigs()).targetPlayers;
+    }
+
+    static async updateTargetPlayers(type: PlayerType): Promise<void> {
+        try {
+            await firestore.doc(this.configPath).update({
+                targetPlayers: type,
+            });
+            doLog(`Updated target players to ${playerTypesMap[type]}`);
+        } catch (err) {
+            doLog(`Error while updating target players: ${err}`);
+        }
+    }
+
+    static async getReleaseUsers(type: PlayerType): Promise<User[]> {
+        let colRef = firestore.collection("players");
+        let query: FirebaseFirestore.CollectionReference | FirebaseFirestore.Query;
+        switch (type) {
+            case "lastWinners": query = colRef.where("lastGame", "==", gameNo() - 1); break;
+            case "weekBackers": query = colRef.where("lastGame", "<", gameNo() - 7); break;
+            case "awesomeStreakers": query = colRef.orderBy("streak", "desc").limit(15); break;
+            case "testers": query = colRef.where("isTester", "==", true); break;
+            case "coolGamers": query = colRef.where("winPercentage", ">", 75); break;
+            case "allPlayers":
+                default: query = colRef;
+        }
+        const snapshot = await query.get();
+        return snapshot.docs.map(doc => User.fromCloud(doc.data()));
     }
 }
