@@ -45,8 +45,8 @@ export default async function startHandler(ctx: Context) {
             user.tries = [];
             user.totalGamesPlayed++;
         }
-        await WordleDB.updateLastGameInConfig(user.id, game.id);
         await WordleDB.updateUser(user);
+        await WordleDB.incrementPlayedCount();
     } catch (err) {
         await doLog(`Error on startHandler: ${err}`);
         await doLog(`Happened for user: ${ctx.from.id}`);

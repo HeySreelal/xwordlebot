@@ -6,6 +6,7 @@ const scripts = require('./scripts');
 async function maintain() {
     // Replace this with your maintenance script that you want to run.
     const res = await Promise.resolve(true);
+
     if (res) {
         console.log("Maintenance complete.");
     } else {

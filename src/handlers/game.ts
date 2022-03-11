@@ -58,6 +58,7 @@ export default async function guessHandler(ctx: Context) {
             if (user.maxStreak < user.streak) user.maxStreak = user.streak;
 
             user.tries = [];
+            await WordleDB.updateWinsOrLose(true);
         } else if (user.tries.length >= 6) {
             user.onGame = false;
             user.lastGame = game.id;
@@ -68,6 +69,7 @@ export default async function guessHandler(ctx: Context) {
             });
             await ctx.reply(`New word showing up in ${getFormatedDuration(game.next)}!`);
             user.tries = [];
+            await WordleDB.updateWinsOrLose(false);
         } else {
             await ctx.reply(`${result.join(' ')}`);
             await ctx.reply(guessPrompt(user.tries.length + 1));

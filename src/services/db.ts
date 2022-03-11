@@ -10,7 +10,7 @@ import User from "../models/user";
 export default class WordleDB {
     static configPath: string = "game/config";
 
-    static getUser = async (userId: number, userName: string): Promise<User> => {
+    static async getUser(userId: number, userName: string): Promise<User> {
         const userDoc = await firestore.doc(`players/${userId}`).get();
         if (!userDoc.exists) {
             // send the greeting message
@@ -20,23 +20,13 @@ export default class WordleDB {
         return User.fromCloud(userDoc.data());
     }
 
-    static onBoardUser = async (userId: number, name: string): Promise<User> => {
+    static async onBoardUser(userId: number, name: string): Promise<User> {
         const user = User.newUser(name, userId);
         try {
             await firestore.doc(`players/${userId}`).set(user.toCloud());
-            await firestore.runTransaction(async tr => {
-                const doc = await tr.get(firestore.doc(this.configPath));
-                const players = doc.data().players;
-                players[userId] = {
-                    id: userId,
-                    notify: true,
-                    lastGame: gameNo(),
-                };
-                tr.update(firestore.doc(this.configPath), {
-                    players,
-                    totalPlayers: Firestore.FieldValue.increment(1),
-                });
-            })
+            await firestore.doc(this.configPath).update({
+                totalPlayers: Firestore.FieldValue.increment(1)
+            });
             return user;
         } catch (err) {
             doLog(`Error [DB/onBoardUser]: ${err.message}`);
@@ -44,12 +34,12 @@ export default class WordleDB {
         }
     }
 
-    static getToday = (): TodaysWordle => {
+    static getToday(): TodaysWordle {
         const todayJson = JSON.parse(readFileSync(`${__dirname}/../../game.json`, 'utf8'));
         return TodaysWordle.fromJson(todayJson);
     }
 
-    static updateUser = async (user: User): Promise<void> => {
+    static async updateUser(user: User): Promise<void> {
         try {
             await firestore.doc(`players/${user.id}`).update(user.toCloud());
         } catch (err) {
@@ -57,12 +47,12 @@ export default class WordleDB {
         }
     }
 
-    static getConfigs = async (): Promise<WordleConfig> => {
+    static async getConfigs(): Promise<WordleConfig> {
         const configs = await firestore.doc(this.configPath).get();
         return configs.data() as WordleConfig;
     }
 
-    static toggleNotification = async (user: number, shouldNotify: boolean): Promise<void> => {
+    static async toggleNotification(user: number, shouldNotify: boolean): Promise<void> {
         try {
             await firestore.runTransaction(async tr => {
                 const doc = await tr.get(firestore.doc(this.configPath));
@@ -78,7 +68,7 @@ export default class WordleDB {
         }
     }
 
-    static updateConfigs = async (configs: WordleConfig): Promise<void> => {
+    static async updateConfigs(configs: WordleConfig): Promise<void> {
         try {
             await firestore.doc(this.configPath).update(configs);
         } catch (err) {
@@ -86,7 +76,7 @@ export default class WordleDB {
         }
     }
 
-    static updateBlocked = async (users: number[]): Promise<void> => {
+    static async updateBlocked(users: number[]): Promise<void> {
         try {
             const batch = firestore.batch();
             const configDoc = firestore.doc(this.configPath);
@@ -111,20 +101,6 @@ export default class WordleDB {
         }
     }
 
-    static updateLastGameInConfig = async (user: number, no: number): Promise<void> => {
-        try {
-            await firestore.runTransaction(async tr => {
-                const doc = firestore.doc("game/config");
-                const data = await tr.get(doc);
-                const config = data.data() as WordleConfig;
-                config.players[user].lastGame = no;
-                tr.update(doc, config);
-            });
-        } catch (err) {
-            doLog(`Error for User <code>${user}</code> while updating last game in config: ${err}`);
-        }
-    }
-
     static async succeedPeople(): Promise<number> {
         const snapshot = await firestore.collection("players")
             .where("lastGame", "==", gameNo() - 1)
@@ -134,6 +110,52 @@ export default class WordleDB {
 
     static async updateToday(): Promise<void> {
         const today = this.getToday();
-        firestore.doc("game/today").update({...today});
+        firestore.doc("game/today").update({ ...today });
+    }
+
+    static async getNotifyUsers(): Promise<User[]> {
+        const snapshot = await firestore.collection("players")
+            .where("notify", "==", true)
+            .where("lastGame", "==", gameNo() - 1)
+            .get();
+        return snapshot.docs.map(doc => User.fromCloud(doc.data()));
+    }
+
+    static async incrementPlayedCount(): Promise<void> {
+        try {
+            await firestore.doc(this.configPath).update({
+                totalPlayed: Firestore.FieldValue.increment(1),
+            });
+        } catch (err) {
+            doLog(`Error while incrementing played count: ${err}`);
+        }
+    }
+
+    static async updateWinsOrLose(isWins: boolean) : Promise<void> {
+        try {
+            if (isWins) {
+                await firestore.doc(this.configPath).update({
+                    totalWins: Firestore.FieldValue.increment(1),
+                });
+            } else {
+                await firestore.doc(this.configPath).update({
+                    totalLoses: Firestore.FieldValue.increment(1),
+                });
+            }
+        } catch (err) {
+            doLog(`Error while updating wins count: ${err}`);
+        }
+    }
+
+    static async resetAnalytics(): Promise<void> {
+        try {
+            await firestore.doc(this.configPath).update({
+                totalPlayed: 0,
+                totalWins: 0,
+                totalLoses: 0,
+            });
+        } catch (err) {
+            doLog(`Error while resetting analytics: ${err}`);
+        }
     }
 }

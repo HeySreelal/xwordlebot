@@ -3,32 +3,23 @@ import { errors, notificationMsgs } from "../config/strings";
 import WordleAnalytics from "../services/analytics";
 import WordleDB from "../services/db";
 import { doLog, random, sleep } from "./utils";
-import { gameNo } from "./word_updater";
 
 export default async function notifyPlayers() {
     const config = await WordleDB.getConfigs();
-    const peeps = Object.values(config.players);
+    const peeps = await WordleDB.getNotifyUsers();
 
     // Send daily analytics
     WordleAnalytics.sendDaily(config);
-    
-    // Player must have enabled notifications
-    // And should be played last game: 
-    // what's the point of notifying them if they haven't played the game from the last notification?
-    // Isn't that spamming? :)
-    const subs = peeps.filter(p => p.notify && p.lastGame == gameNo() - 1);
-    
 
     let blockedPeeps = [];
     let failedCount = 0;
 
-    for (const player of subs) {
+    for (const player of peeps) {
         await sleep(2000);
         // Try sending the notification message, if it fails on blocked error -> unsubscribe the user
         await bot.api.sendMessage(player.id, random(notificationMsgs))
             .catch(err => {
-                if (err.description === errors.blocked) {
-                    config.players[player.id].notify = false;
+                if (err.description === errors.blocked || err.description === errors.cannot_initiate) {
                     blockedPeeps.push(player.id);
                     config.blockedPlayers++;
                 }
@@ -41,5 +32,5 @@ export default async function notifyPlayers() {
         await WordleDB.updateBlocked(blockedPeeps);
     }
 
-    doLog(`Sent ${subs.length} notifications to ${subs.length - failedCount} users. And failed to send to ${failedCount} users.`);
+    doLog(`Sent ${peeps.length} notifications to ${peeps.length - failedCount} users. And failed to send to ${failedCount} users.`);
 }
