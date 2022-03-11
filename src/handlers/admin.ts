@@ -1,10 +1,12 @@
 import { Context } from "grammy";
-import bot, { admins } from "../config/config";
+import bot, { admins, logsChannel } from "../config/config";
 import { errors } from "../config/strings";
 import handleErrorWithEase from "../helpers/error_logger";
 import playerTypesMap from "../helpers/player_types";
+import profileDetails from "../helpers/profile";
 import { doLog, sleep } from "../helpers/utils";
 import { PlayerType } from "../models/types";
+import User from "../models/user";
 import WordleAnalytics from "../services/analytics";
 import WordleDB from "../services/db";
 
@@ -253,5 +255,69 @@ export default class AdminHandlers {
         await ctx.reply(`There are <b>${users.length}</b> users in the release list.`, {
             parse_mode: "HTML"
         });
+    }
+
+    static async postTesterRequest(ctx: Context, user: User) {
+        await bot.api.sendMessage(
+            logsChannel, `🆕 New Tester Request: ` +
+            `<b>${ctx.from.first_name}</b>\n\n` +
+            `ID <b>${ctx.from.id}</b>\n\n${profileDetails(user)}\n` + 
+            `#TesterRequest`,
+            {
+                parse_mode: "HTML",
+                reply_markup: {
+                    inline_keyboard: [
+                        [ { text: 'Approve ✅', callback_data: `testerRequest_${user.id}-approve` } ],
+                        [ { text: 'Reject ❌', callback_data: `testerRequest_${user.id}-reject` } ]
+                    ],
+                },
+            }
+        );
+    }
+
+    static async testerRequest(ctx: Context, value: string) {
+        try {
+            const id = ctx.from.id;
+            if (!admins.includes(id)) {
+                doLog(`User ${id} is not an admin. Admins are: ${admins}`);
+                await ctx.reply(`You are not authorized to use this command. 👨🏻‍💻`);
+                return;
+            }
+            // value = 1407956293-approve
+            const [userId, action] = value.split("-");
+            const user = await WordleDB.getUser(parseInt(userId));
+            let reply = "Tester Request Update! 🧑🏻‍💻\n\n";
+            if (action == "approve") {
+                user.isTester = "yes";
+                reply = reply + `Hey, you have been approved as a tester, now! 🎉\n\nYou'll be updated when we're conducting a release or updates. 🚀 \nLet's hangout at @xBotsChat if you're interested!`;
+                
+                ctx.editMessageReplyMarkup({
+                    reply_markup: {
+                        inline_keyboard: [
+                            [ { text: 'Approved ✅', callback_data: `testerRequest_${user.id}-reject` } ],
+                        ],
+                    }
+                });
+            } else if (action == "reject") {
+                user.isTester = "no";
+                reply =  reply + `Hey, we have closely reviewd your profile and have decided to reject your tester request for now. 🙂\n\nDon't worry, you can apply again sometime later to get approved!`;
+                ctx.editMessageReplyMarkup({
+                    reply_markup: {
+                        inline_keyboard: [
+                            [ { text: 'Rejected ❌', callback_data: `testerRequest_${user.id}-approve` } ],
+                        ],
+                    }
+                });
+            }
+            bot.api.sendMessage(user.id, reply, {
+                parse_mode: "HTML",
+            });
+            await WordleDB.updateUser(user);
+
+            ctx.answerCallbackQuery("Tester Request Updated!");
+            
+        } catch (err) {
+            handleErrorWithEase(err, ctx, "testerRequest/admin");
+        }
     }
 }

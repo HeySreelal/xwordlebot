@@ -11,7 +11,7 @@ import User from "../models/user";
 export default class WordleDB {
     static configPath: string = "game/config";
 
-    static async getUser(userId: number, userName: string): Promise<User> {
+    static async getUser(userId: number, userName?: string): Promise<User> {
         const userDoc = await firestore.doc(`players/${userId}`).get();
         if (!userDoc.exists) {
             // send the greeting message

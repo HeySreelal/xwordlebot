@@ -13,6 +13,9 @@ export default async function guessHandler(ctx: Context) {
         return;
     }
     try {
+        if(!ctx.from && ctx.channelPost) {
+            return;
+        }
         const user = await WordleDB.getUser(ctx.from.id, ctx.from.first_name);
         const game = WordleDB.getToday();
 
@@ -80,6 +83,7 @@ export default async function guessHandler(ctx: Context) {
         }
         await WordleDB.updateUser(user);
     } catch (err) {
+        console.log(err);
         handleErrorWithEase(err, ctx, 'guessHandler/game');
     }
 }

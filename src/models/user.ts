@@ -14,6 +14,7 @@ export default class User {
     totalGamesPlayed: number;
     totalWins: number;
     currentGame: number;
+    isTester: string;
 
     constructor (user: U) {
         this.id = user.id;
@@ -28,6 +29,7 @@ export default class User {
         this.totalGamesPlayed = user.totalGamesPlayed || 0;
         this.totalWins = user.totalWins || 0;
         this.currentGame = user.currentGame || 0;
+        this.isTester = user.isTester || "no";
     }
 
     static fromCloud(user: FirebaseFirestore.DocumentData) {
@@ -44,6 +46,7 @@ export default class User {
             totalGamesPlayed: user.totalGamesPlayed || 0 as number,
             totalWins: user.totalWins || 0 as number,
             currentGame: user.currentGame || 0 as number,
+            isTester: user.isTester || "no" as string,
         });
     }
 
@@ -61,6 +64,7 @@ export default class User {
             totalGamesPlayed: this.totalGamesPlayed,
             totalWins: this.totalWins,
             currentGame: this.currentGame,
+            isTester: this.isTester,
         };
     }
 
@@ -78,6 +82,7 @@ export default class User {
             totalGamesPlayed: 0,
             totalWins: 0,
             currentGame: 0,
+            isTester: "no",
         });
     }
 }
@@ -97,4 +102,5 @@ export interface U {
     totalGamesPlayed: number;
     totalWins: number;
     currentGame: number;
+    isTester: string;
 }

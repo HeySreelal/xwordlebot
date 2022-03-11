@@ -7,7 +7,7 @@ import bot from './config/config';
 import { errors } from './config/strings';
 import AdminHandlers from './handlers/admin';
 import callbackHandler from './handlers/callbacks';
-import { nextWord, profileHandler } from './handlers/etc';
+import { letmeBeATester, nextWord, profileHandler } from './handlers/etc';
 import WordleFilters from './handlers/filters';
 import guessHandler from './handlers/game';
 import helpHandler, { aboutHandler } from './handlers/help';
@@ -42,10 +42,15 @@ bot.hears(/^(🚀 Release)$/, AdminHandlers.promptRelease);
 
 bot.hears(/^(👫 Get Target Players)$/, AdminHandlers.getTargetPlayers);
 bot.hears(/^(👫 Set Target Players)$/, AdminHandlers.askTargetPlayersPrompt);
-bot.hears(/^(🍂 Count Release People)$/, AdminHandlers.askTargetPlayersPrompt);
+bot.hears(/^(🍂 Count Release People)$/, AdminHandlers.getReleaseUsersCount);
+
+bot.command("tester", letmeBeATester);
 
 bot.filter(WordleFilters.adminFilters, WordleFilters.adminFilterHandlers);
 
+bot.on("channel_post", ctx => {
+    return;
+});
 
 // On Word Guess
 bot.on(":text", guessHandler);

@@ -9,6 +9,7 @@ const callbackHandler = (ctx: Context) => {
         case "notify": toggleNotification(ctx, value === "yes"); break;
         case "release": AdminHandlers.release(ctx, value == "yes"); break;
         case "targetPlayers": AdminHandlers.setTargetPlayers(ctx, value as PlayerType); break;
+        case "testerRequest": AdminHandlers.testerRequest(ctx, value); break;
         default: break;
     }
 
