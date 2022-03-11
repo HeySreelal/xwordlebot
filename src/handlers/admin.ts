@@ -28,6 +28,7 @@ export default class AdminHandlers {
                     [{ "text": "📊 Get Analytics" }],
                     [{ "text": "📃 Get Release Notes" }, { "text": "📝 Set Release Notes" }],
                     [{ "text": "👫 Get Target Players" }, { "text": "👫 Set Target Players" }],
+                    [{ "text": "🍂 Count Release People"}],
                     [{ "text": "🚀 Release" }],
                 ]
             }
@@ -159,10 +160,13 @@ export default class AdminHandlers {
                 await sleep(1000);
             }
 
-            doLog("Updating config... 🧑🏻‍🔧");
-            await WordleDB.updateConfigs(config);
-            doLog("Updating blocked people... 🧑🏻‍💻");
-            await WordleDB.updateBlocked(blockedPeeps);
+            if(blockedPeeps.length > 0) {
+                doLog("Updating config... 🧑🏻‍🔧");
+                await WordleDB.updateConfigs(config);
+                doLog("Updating blocked people... 🧑🏻‍💻");
+                await WordleDB.updateBlocked(blockedPeeps);
+            }
+            
             await ctx.reply(`Release complete. 🎉`);
             doLog("Release complete. 🎉");
             doLog(`Tried sending release to: ${users.length}. Eventually realized that ${blockedPeeps.length} have blocked. That sums up to total of ${failedPeeps} failed messages.\n\nHopefully, we have delivered ${users.length - failedPeeps} messages. 🚀`);
@@ -243,4 +247,11 @@ export default class AdminHandlers {
         }
     }
 
+    static async getReleaseUsersCount(ctx: Context) {
+        const config = await WordleDB.getConfigs();
+        const users = await WordleDB.getReleaseUsers(config.targetPlayers);
+        await ctx.reply(`There are <b>${users.length}</b> users in the release list.`, {
+            parse_mode: "HTML"
+        });
+    }
 }

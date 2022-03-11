@@ -42,6 +42,7 @@ bot.hears(/^(🚀 Release)$/, AdminHandlers.promptRelease);
 
 bot.hears(/^(👫 Get Target Players)$/, AdminHandlers.getTargetPlayers);
 bot.hears(/^(👫 Set Target Players)$/, AdminHandlers.askTargetPlayersPrompt);
+bot.hears(/^(🍂 Count Release People)$/, AdminHandlers.askTargetPlayersPrompt);
 
 bot.filter(WordleFilters.adminFilters, WordleFilters.adminFilterHandlers);
 
