@@ -54,14 +54,8 @@ export default class WordleDB {
 
     static async toggleNotification(user: number, shouldNotify: boolean): Promise<void> {
         try {
-            await firestore.runTransaction(async tr => {
-                const doc = await tr.get(firestore.doc(this.configPath));
-                const players = doc.data().players;
-                players[user].notify = shouldNotify;
-                tr.update(firestore.doc(this.configPath), { players });
-            });
             await firestore.doc(`players/${user}`).update({
-                notify: true,
+                notify: shouldNotify,
             });
         } catch (err) {
             doLog(`Error [DB/toggleNotification]: ${err.message}`);

@@ -12,6 +12,42 @@ const paths = {
     config: "game/config",
 };
 
+/**
+ * Date: 11th March 2022
+ *
+ * Just noticed that notification handler always sets notify: true in user document. That means, even if
+ * user disabled notifications, `notify` field will be true in user document. But not the config file.
+ * So, we need to compare the `notify` field in user document with the `notify` field in config file.
+ * And if they are different, we need to update the user document with the config file's `notify` field.
+ */
+
+async function compareNotifyFields() {
+    try {
+        const users = await db.doc(paths.config).get();
+        const batch = db.batch();
+
+        let updated = [];
+        let count = 0;
+        for (const user of Object.keys(users.data().players)) {
+            console.log(`User #${count} - ${user}`);
+            const u = users.data().players[user];
+            const userDoc = await db.doc(`players/${user}`).get();
+            const userData = userDoc.data();
+            if (userData.notify !== u.notify) {
+                batch.update(userDoc.ref, { notify: u.notify });
+                updated.push(user);
+            }
+            count++;
+        }
+        await batch.commit();
+        console.log("Updated: ", updated.length, " docs!");
+        fs.writeFileSync('things.txt', JSON.stringify(updated));
+        return true;
+    } catch (err) {
+        console.log(err);
+        return false;
+    }
+}
 
 /**
  * Just migrate :)
@@ -38,7 +74,7 @@ async function migrateData() {
  *
  * I was not prepared for this 1400+ users. Need to migrate data to each player's own document. Otherwise, I'll surely be messed up.
  */
- async function compareTotalPlayersCount() {
+async function compareTotalPlayersCount() {
     try {
         const configDoc = await db.doc(paths.config).get();
         const config = configDoc.data();
@@ -63,7 +99,7 @@ async function migrateData() {
  * Day 1: Let's find out which player is having the problem. Added a extra log in
  * [src/services/db.ts](https://github.com/HeySreelal/xwordlebot/blob/main/src/services/db.ts) to find this out.
  */
- async function fixLastGameInConfig() {
+async function fixLastGameInConfig() {
     throw new Error("Not implemented yet.");
 }
 
@@ -73,7 +109,7 @@ async function migrateData() {
  * Thanks to https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array for the shuffle algorithm
  * @return {Array}
  */
- function shuffle(array) {
+function shuffle(array) {
     let currentIndex = array.length, randomIndex;
 
     // While there remain elements to shuffle...
@@ -129,7 +165,7 @@ async function succeedPeople() {
  * Trying to setup notifications only for those people who played the preious game.
  * @returns {Promise<boolean>}
  */
- async function includeLastGameIDinConfig() {
+async function includeLastGameIDinConfig() {
     try {
         const players = await db.collection('players').get();
         const config = (await db.doc(paths.config).get()).data();
@@ -151,4 +187,5 @@ module.exports = {
     fixLastGameInConfig,
     compareTotalPlayersCount,
     migrateData,
+    compareNotifyFields,
 }
