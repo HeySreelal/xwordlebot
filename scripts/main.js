@@ -1,4 +1,4 @@
-const scripts = require('./scripts');
+const Maintenance = require('./scripts');
 
 /**
  * Just maintenance scripts - just in case anything goes wrong or quick fixes and changes.
