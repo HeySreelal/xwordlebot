@@ -20,12 +20,12 @@ export default class WordleAnalytics {
 
         return `<b>Wordle Analytics</b> 📊` +
             `\n\n<b>Game No:</b> ${gameNo() - 1}` +
-            `\n\n<b>Total Players:</b> ${peeps}` +
-            `\n<b>Played:</b> ${playedCount}` +
-            `\n<b>Succeed:</b> ${succeedCount}` +
-            `\n<b>Loses: </b> ${losesCount}` +
-            `\n<b>Half Way:</b> ${halfWay}` +
-            `\n<b>Blocked:</b> ${blockedCount}` +
+            `\n\n👥 <b>Total Players:</b> ${peeps}` +
+            `\n🎳 <b>Played:</b> ${playedCount}` +
+            `\n🏅 <b>Succeed:</b> ${succeedCount}` +
+            `\n😔 <b>Loses: </b> ${losesCount}` +
+            `\n🌗 <b>Half Way:</b> ${halfWay}` +
+            `\n🚧 <b>Blocked:</b> ${blockedCount}` +
             `\n\n#Analytics 📊`;
     }
 }

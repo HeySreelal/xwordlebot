@@ -25,26 +25,17 @@ bot.command("about", aboutHandler);
 bot.command("next", nextWord);
 bot.command("quit", quitHandler);
 bot.command("profile", profileHandler);
+bot.command("tester", letmeBeATester);
 
 // Admin Commands
 bot.command("mod", AdminHandlers.mod);
-bot.command("analytics", AdminHandlers.getAnalytics)
 bot.hears(/^(📊 Get Analytics)$/, AdminHandlers.getAnalytics);
-
-bot.command("getRelease", AdminHandlers.getReleaseNotes);
 bot.hears(/^(📃 Get Release Notes)$/, AdminHandlers.getReleaseNotes);
-
-bot.command("setRelease", AdminHandlers.askReleasePrompt);
 bot.hears(/^(📝 Set Release Notes)$/, AdminHandlers.askReleasePrompt);
-
-bot.command("release", AdminHandlers.promptRelease);
 bot.hears(/^(🚀 Release)$/, AdminHandlers.promptRelease);
-
 bot.hears(/^(👫 Get Target Players)$/, AdminHandlers.getTargetPlayers);
 bot.hears(/^(👫 Set Target Players)$/, AdminHandlers.askTargetPlayersPrompt);
 bot.hears(/^(🍂 Count Release People)$/, AdminHandlers.getReleaseUsersCount);
-
-bot.command("tester", letmeBeATester);
 
 bot.filter(WordleFilters.adminFilters, WordleFilters.adminFilterHandlers);
 
