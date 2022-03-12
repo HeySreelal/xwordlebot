@@ -288,7 +288,7 @@ export default class AdminHandlers {
             const user = await WordleDB.getUser(parseInt(userId));
             let reply = "Tester Request Update! 🧑🏻‍💻\n\n";
             if (action == "approve") {
-                user.isTester = "yes";
+                user.role = "Tester";
                 reply = reply + `Hey, you have been approved as a tester, now! 🎉\n\nYou'll be updated when we're conducting a release or updates. 🚀 \nLet's hangout at @xBotsChat if you're interested!`;
                 
                 ctx.editMessageReplyMarkup({
@@ -299,7 +299,7 @@ export default class AdminHandlers {
                     }
                 });
             } else if (action == "reject") {
-                user.isTester = "no";
+                user.role = "Player";
                 reply =  reply + `Hey, we have closely reviewd your profile and have decided to reject your tester request for now. 🙂\n\nDon't worry, you can apply again sometime later to get approved!`;
                 ctx.editMessageReplyMarkup({
                     reply_markup: {

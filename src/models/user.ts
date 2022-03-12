@@ -1,3 +1,5 @@
+import { PlayerRole } from "./types";
+
 /**
  * User Model
  */
@@ -14,7 +16,7 @@ export default class User {
     totalGamesPlayed: number;
     totalWins: number;
     currentGame: number;
-    isTester: string;
+    role: PlayerRole;
 
     constructor (user: U) {
         this.id = user.id;
@@ -29,7 +31,7 @@ export default class User {
         this.totalGamesPlayed = user.totalGamesPlayed || 0;
         this.totalWins = user.totalWins || 0;
         this.currentGame = user.currentGame || 0;
-        this.isTester = user.isTester || "no";
+        this.role = user.role || "Player";
     }
 
     static fromCloud(user: FirebaseFirestore.DocumentData) {
@@ -46,7 +48,7 @@ export default class User {
             totalGamesPlayed: user.totalGamesPlayed || 0 as number,
             totalWins: user.totalWins || 0 as number,
             currentGame: user.currentGame || 0 as number,
-            isTester: user.isTester || "no" as string,
+            role: user.role || "Player" as PlayerRole,
         });
     }
 
@@ -64,7 +66,7 @@ export default class User {
             totalGamesPlayed: this.totalGamesPlayed,
             totalWins: this.totalWins,
             currentGame: this.currentGame,
-            isTester: this.isTester,
+            role: this.role,
         };
     }
 
@@ -82,7 +84,7 @@ export default class User {
             totalGamesPlayed: 0,
             totalWins: 0,
             currentGame: 0,
-            isTester: "no",
+            role: "Player",
         });
     }
 }
@@ -102,5 +104,5 @@ export interface U {
     totalGamesPlayed: number;
     totalWins: number;
     currentGame: number;
-    isTester: string;
+    role: PlayerRole;
 }

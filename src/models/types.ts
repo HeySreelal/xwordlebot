@@ -9,3 +9,5 @@ export default interface WordleConfig {
 }
 
 export type PlayerType = "lastWinners" | "weekBackers" | "awesomeStreakers" | "coolGamers" | "testers" | "allPlayers";
+
+export type PlayerRole = "Player" | "Tester" | "Admin" | "SuperAdmin" | "Pending";

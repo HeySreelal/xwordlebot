@@ -192,7 +192,7 @@ export default class WordleDB {
             case "lastWinners": query = colRef.where("lastGame", "==", gameNo() - 1); break;
             case "weekBackers": query = colRef.where("lastGame", "<", gameNo() - 7); break;
             case "awesomeStreakers": query = colRef.orderBy("streak", "desc").limit(15); break;
-            case "testers": query = colRef.where("isTester", "==", true); break;
+            case "testers": query = colRef.where("role", "==", "Tester"); break;
             case "coolGamers": query = colRef.where("winPercentage", ">", 75); break;
             case "allPlayers":
                 default: query = colRef;

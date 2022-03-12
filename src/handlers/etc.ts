@@ -36,16 +36,16 @@ export async function profileHandler(ctx: Context) {
 export async function letmeBeATester(ctx: Context) {
     try {
         const user = await WordleDB.getUser(ctx.from.id, ctx.from.first_name);
-        if (user.isTester == "yes") {
+        if (user.role == "Tester") {
             return ctx.reply(`You are already a Tester! 🧛`);
-        } else if (user.isTester == "pending") {
+        } else if (user.role == "Pending") {
             doLog(`Impatient tester <code>${user.id}</code> 👨🏻‍💻`);
             return ctx.reply(`You have already applied for Tester status! Please wait for the admin to approve you. 👨🏻‍💻`);
         }
         
         await AdminHandlers.postTesterRequest(ctx, user);
 
-        user.isTester = "pending";
+        user.role = "Pending";
         await WordleDB.updateUser(user);
 
         await ctx.replyWithChatAction("typing");
