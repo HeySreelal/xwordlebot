@@ -189,7 +189,7 @@ export default class WordleDB {
         let colRef = firestore.collection("players");
         let query: FirebaseFirestore.CollectionReference | FirebaseFirestore.Query;
         switch (type) {
-            case "lastWinners": query = colRef.where("lastGame", "==", gameNo() - 1); break;
+            case "lastWinners": query = colRef.where("lastGame", "==", gameNo()); break;
             case "weekBackers": query = colRef.where("lastGame", "<", gameNo() - 7); break;
             case "awesomeStreakers": query = colRef.orderBy("streak", "desc").limit(15); break;
             case "testers": query = colRef.where("role", "==", "Tester"); break;
