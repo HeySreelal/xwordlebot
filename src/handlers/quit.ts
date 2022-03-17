@@ -2,6 +2,7 @@ import { Context } from "grammy";
 import { errors, inGameMessages } from "../config/strings";
 import { getFormatedDuration } from "../helpers/date";
 import handleErrorWithEase from "../helpers/error_logger";
+import { logToFile } from "../helpers/utils";
 import WordleDB from "../services/db";
 
 export default async function quitHandler(ctx: Context) {
@@ -17,6 +18,8 @@ export default async function quitHandler(ctx: Context) {
             return ctx.reply(inGameMessages.notOnGame);
         }
 
+        logToFile(`${ctx.from.id} quit the game after ${user.tries.length} tries.`);
+
         user.onGame = false;
         user.lastGame = game.id;
         user.streak = 0;
@@ -29,6 +32,7 @@ export default async function quitHandler(ctx: Context) {
             parse_mode: "HTML"
         });
         await ctx.reply(`See ya with the next word on ${getFormatedDuration(game.next)}!`);
+        await WordleDB.updateWinsOrLose(false);
     } catch (err) {
         handleErrorWithEase(err, ctx, 'quitHandler');
     }

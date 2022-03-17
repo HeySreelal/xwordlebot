@@ -1,5 +1,6 @@
 import bot, { logsChannel } from "../config/config";
 import { getBoxes } from "../handlers/game";
+import * as fs from "fs";
 
 export const guessPrompt = (tryCount: number): string => {
     if (tryCount === 1) {
@@ -43,4 +44,11 @@ export async function doLog(msg: string) {
     await bot.api.sendMessage(logsChannel, msg, { parse_mode: "HTML" });
     // just in case to avoid Too Many Requests
     await sleep(1000);
+}
+
+export function logToFile(msg: string) {
+    const file = './logs.txt';
+    const date = new Date();
+    const data = `${date.toLocaleString()} - ${msg}\n`;
+    fs.appendFileSync(file, data + '\n');
 }

@@ -1,4 +1,4 @@
-import { Context } from "grammy";
+import { Context, InputFile } from "grammy";
 import bot, { admins, logsChannel } from "../config/config";
 import { errors } from "../config/strings";
 import handleErrorWithEase from "../helpers/error_logger";
@@ -16,7 +16,7 @@ export default class AdminHandlers {
         setRelease: `Send me the release note:`,
         setTargetPlayers: `Select a option as release target players:`,
     }
-   
+
     static async mod(ctx: Context) {
         const id = ctx.from.id;
         if (!admins.includes(id)) {
@@ -30,7 +30,7 @@ export default class AdminHandlers {
                     [{ "text": "📊 Get Analytics" }],
                     [{ "text": "📃 Get Release Notes" }, { "text": "📝 Set Release Notes" }],
                     [{ "text": "👫 Get Target Players" }, { "text": "👫 Set Target Players" }],
-                    [{ "text": "🍂 Count Release People"}],
+                    [{ "text": "🍂 Count Release People" }],
                     [{ "text": "🚀 Release" }],
                 ]
             }
@@ -162,13 +162,13 @@ export default class AdminHandlers {
                 await sleep(1000);
             }
 
-            if(blockedPeeps.length > 0) {
+            if (blockedPeeps.length > 0) {
                 doLog("Updating config... 🧑🏻‍🔧");
                 await WordleDB.updateConfigs(config);
                 doLog("Updating blocked people... 🧑🏻‍💻");
                 await WordleDB.updateBlocked(blockedPeeps);
             }
-            
+
             await ctx.reply(`Release complete. 🎉`);
             doLog("Release complete. 🎉");
             doLog(`Tried sending release to: ${users.length}. Eventually realized that ${blockedPeeps.length} have blocked. That sums up to total of ${failedPeeps} failed messages.\n\nHopefully, we have delivered ${users.length - failedPeeps} messages. 🚀`);
@@ -261,14 +261,14 @@ export default class AdminHandlers {
         await bot.api.sendMessage(
             logsChannel, `🆕 New Tester Request: ` +
             `<b>${ctx.from.first_name}</b>\n\n` +
-            `ID <b>${ctx.from.id}</b>\n\n${profileDetails(user)}\n` + 
-            `#TesterRequest`,
+            `ID <b>${ctx.from.id}</b>\n\n${profileDetails(user)}\n` +
+        `#TesterRequest`,
             {
                 parse_mode: "HTML",
                 reply_markup: {
                     inline_keyboard: [
-                        [ { text: 'Approve ✅', callback_data: `testerRequest_${user.id}-approve` } ],
-                        [ { text: 'Reject ❌', callback_data: `testerRequest_${user.id}-reject` } ]
+                        [{ text: 'Approve ✅', callback_data: `testerRequest_${user.id}-approve` }],
+                        [{ text: 'Reject ❌', callback_data: `testerRequest_${user.id}-reject` }]
                     ],
                 },
             }
@@ -290,21 +290,21 @@ export default class AdminHandlers {
             if (action == "approve") {
                 user.role = "Tester";
                 reply = reply + `Hey, you have been approved as a tester, now! 🎉\n\nYou'll be updated when we're conducting a release or updates. 🚀 \nLet's hangout at @xBotsChat if you're interested!`;
-                
+
                 ctx.editMessageReplyMarkup({
                     reply_markup: {
                         inline_keyboard: [
-                            [ { text: 'Approved ✅', callback_data: `testerRequest_${user.id}-reject` } ],
+                            [{ text: 'Approved ✅', callback_data: `testerRequest_${user.id}-reject` }],
                         ],
                     }
                 });
             } else if (action == "reject") {
                 user.role = "Player";
-                reply =  reply + `Hey, we have closely reviewd your profile and have decided to reject your tester request for now. 🙂\n\nDon't worry, you can apply again sometime later to get approved!`;
+                reply = reply + `Hey, we have closely reviewd your profile and have decided to reject your tester request for now. 🙂\n\nDon't worry, you can apply again sometime later to get approved!`;
                 ctx.editMessageReplyMarkup({
                     reply_markup: {
                         inline_keyboard: [
-                            [ { text: 'Rejected ❌', callback_data: `testerRequest_${user.id}-approve` } ],
+                            [{ text: 'Rejected ❌', callback_data: `testerRequest_${user.id}-approve` }],
                         ],
                     }
                 });
@@ -315,9 +315,19 @@ export default class AdminHandlers {
             await WordleDB.updateUser(user);
 
             ctx.answerCallbackQuery("Tester Request Updated!");
-            
+
         } catch (err) {
             handleErrorWithEase(err, ctx, "testerRequest/admin");
         }
+    }
+
+    static async log(ctx: Context) {
+        const id = ctx.from.id;
+        if (!admins.includes(id)) {
+            doLog(`User ${id} is not an admin. Admins are: ${admins}`);
+            await ctx.reply(`You are not authorized to use this command. 👨🏻‍💻`);
+            return;
+        }
+        ctx.replyWithDocument(new InputFile("./logs.txt"));
     }
 }

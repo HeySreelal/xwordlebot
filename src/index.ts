@@ -29,6 +29,7 @@ bot.command("tester", letmeBeATester);
 
 // Admin Commands
 bot.command("mod", AdminHandlers.mod);
+bot.command("log", AdminHandlers.log);
 bot.hears(/^(📊 Get Analytics)$/, AdminHandlers.getAnalytics);
 bot.hears(/^(📃 Get Release Notes)$/, AdminHandlers.getReleaseNotes);
 bot.hears(/^(📝 Set Release Notes)$/, AdminHandlers.askReleasePrompt);
