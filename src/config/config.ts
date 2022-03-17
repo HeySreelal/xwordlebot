@@ -9,7 +9,7 @@ admin.initializeApp({
 const firestore = admin.firestore();
 const Firestore = admin.firestore;
 
-const token = process.env.TEST_TOKEN || "YOUR_BOT_TOKEN";
+const token = process.env.BOT_TOKEN || "YOUR_BOT_TOKEN";
 const logsChannel = process.env.LOGS || "LOGS_CHANNEL_ID";
 const admins = (process.env.ADMINS || "ADMIN,USER,IDs").split(",").map(x => parseInt(x));
 
