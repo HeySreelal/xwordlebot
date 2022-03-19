@@ -4,7 +4,7 @@ import { errors } from "../config/strings";
 import handleErrorWithEase from "../helpers/error_logger";
 import playerTypesMap from "../helpers/player_types";
 import profileDetails from "../helpers/profile";
-import { doLog, sleep } from "../helpers/utils";
+import { doLog, logToFile, sleep } from "../helpers/utils";
 import { PlayerType } from "../models/types";
 import User from "../models/user";
 import WordleAnalytics from "../services/analytics";
@@ -157,6 +157,7 @@ export default class AdminHandlers {
                         blockedPeeps.push(user.id);
                         config.blockedPlayers++;
                     }
+                    logToFile(err);
                     failedPeeps++;
                 });
                 await sleep(1000);
@@ -167,6 +168,7 @@ export default class AdminHandlers {
                 await WordleDB.updateConfigs(config);
                 doLog("Updating blocked people... 🧑🏻‍💻");
                 await WordleDB.updateBlocked(blockedPeeps);
+                await AdminHandlers.log(ctx); 
             }
 
             await ctx.reply(`Release complete. 🎉`);
