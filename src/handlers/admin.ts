@@ -1,4 +1,4 @@
-import { Context, InputFile } from "grammy";
+import { Context, InputFile, NextFunction } from "grammy";
 import bot, { admins, logsChannel } from "../config/config";
 import { errors } from "../config/strings";
 import handleErrorWithEase from "../helpers/error_logger";
@@ -18,12 +18,6 @@ export default class AdminHandlers {
     }
 
     static async mod(ctx: Context) {
-        const id = ctx.from.id;
-        if (!admins.includes(id)) {
-            doLog(`User ${id} is not an admin. Admins are: ${admins}`);
-            await ctx.reply(`You are not authorized to use this command. 👨🏻‍💻`);
-            return;
-        }
         ctx.reply(`Hello Captain, ${ctx.from.first_name}!\n\nWhat would you like to do today?`, {
             reply_markup: {
                 keyboard: [
@@ -39,12 +33,6 @@ export default class AdminHandlers {
 
     static async getAnalytics(ctx: Context): Promise<void> {
         try {
-            const id = ctx.from.id;
-            if (!admins.includes(id)) {
-                doLog(`User ${id} is not an admin. Admins are: ${admins}`);
-                await ctx.reply(`You are not authorized to use this command. 👨🏻‍💻`);
-                return;
-            }
             ctx.replyWithChatAction("typing");
             const config = await WordleDB.getConfigs();
             const reply = await WordleAnalytics.getDaily(config);
@@ -58,12 +46,6 @@ export default class AdminHandlers {
 
     static async getReleaseNotes(ctx: Context): Promise<void> {
         try {
-            const id = ctx.from.id;
-            if (!admins.includes(id)) {
-                doLog(`User ${id} is not an admin. Admins are: ${admins}`);
-                await ctx.reply(`You are not authorized to use this command. 👨🏻‍💻`);
-                return;
-            }
             await ctx.replyWithChatAction("typing");
             const note = await WordleDB.getReleaseNote();
             await sleep(200);
@@ -77,12 +59,6 @@ export default class AdminHandlers {
 
     static async askReleasePrompt(ctx: Context): Promise<void> {
         try {
-            const id = ctx.from.id;
-            if (!admins.includes(id)) {
-                doLog(`User ${id} is not an admin. Admins are: ${admins}`);
-                await ctx.reply(`You are not authorized to use this command. 👨🏻‍💻`);
-                return;
-            }
             await ctx.reply(AdminHandlers.prompts.setRelease, {
                 reply_markup: {
                     force_reply: true
@@ -126,13 +102,6 @@ export default class AdminHandlers {
             return;
         }
         try {
-            const id = ctx.from.id;
-            if (!admins.includes(id)) {
-                doLog(`User ${id} is not an admin. Admins are: ${admins}`);
-                await ctx.reply(`You are not authorized to use this command. 👨🏻‍💻`);
-                return;
-            }
-
             doLog("Preparing for release...");
             await ctx.answerCallbackQuery("Preparing for release...");
             await ctx.editMessageText("Pushing into the horizon! 🚀");
@@ -168,7 +137,7 @@ export default class AdminHandlers {
                 await WordleDB.updateConfigs(config);
                 doLog("Updating blocked people... 🧑🏻‍💻");
                 await WordleDB.updateBlocked(blockedPeeps);
-                await AdminHandlers.log(ctx); 
+                await AdminHandlers.log(ctx);
             }
 
             await ctx.reply(`Release complete. 🎉`);
@@ -182,12 +151,6 @@ export default class AdminHandlers {
 
     static async getTargetPlayers(ctx: Context): Promise<void> {
         try {
-            const id = ctx.from.id;
-            if (!admins.includes(id)) {
-                doLog(`User ${id} is not an admin. Admins are: ${admins}`);
-                await ctx.reply(`You are not authorized to use this command. 👨🏻‍💻`);
-                return;
-            }
             await ctx.replyWithChatAction("typing");
             const type = await WordleDB.getTargetPlayers();
             await ctx.reply(`👫 Current target players are: <b>${playerTypesMap[type]}</b>`, {
@@ -200,12 +163,6 @@ export default class AdminHandlers {
 
     static async askTargetPlayersPrompt(ctx: Context): Promise<void> {
         try {
-            const id = ctx.from.id;
-            if (!admins.includes(id)) {
-                doLog(`User ${id} is not an admin. Admins are: ${admins}`);
-                await ctx.reply(`You are not authorized to use this command. 👨🏻‍💻`);
-                return;
-            }
             await ctx.reply(AdminHandlers.prompts.setTargetPlayers, {
                 reply_markup: {
                     inline_keyboard: [
@@ -225,12 +182,6 @@ export default class AdminHandlers {
 
     static async setTargetPlayers(ctx: Context, value: PlayerType): Promise<void> {
         try {
-            const id = ctx.from.id;
-            if (!admins.includes(id)) {
-                doLog(`User ${id} is not an admin. Admins are: ${admins}`);
-                await ctx.reply(`You are not authorized to use this command. 👨🏻‍💻`);
-                return;
-            }
             await ctx.answerCallbackQuery("Setting target players...");
             await ctx.editMessageText(`Setting target players to: <b>${playerTypesMap[value]}</b>`, {
                 parse_mode: "HTML"
@@ -279,12 +230,6 @@ export default class AdminHandlers {
 
     static async testerRequest(ctx: Context, value: string) {
         try {
-            const id = ctx.from.id;
-            if (!admins.includes(id)) {
-                doLog(`User ${id} is not an admin. Admins are: ${admins}`);
-                await ctx.reply(`You are not authorized to use this command. 👨🏻‍💻`);
-                return;
-            }
             // value = 1407956293-approve
             const [userId, action] = value.split("-");
             const user = await WordleDB.getUser(parseInt(userId));
@@ -324,12 +269,16 @@ export default class AdminHandlers {
     }
 
     static async log(ctx: Context) {
+        ctx.replyWithDocument(new InputFile("./logs.txt"));
+    }
+
+    static async adminCheck(ctx: Context, next: NextFunction) {
         const id = ctx.from.id;
         if (!admins.includes(id)) {
             doLog(`User ${id} is not an admin. Admins are: ${admins}`);
             await ctx.reply(`You are not authorized to use this command. 👨🏻‍💻`);
             return;
         }
-        ctx.replyWithDocument(new InputFile("./logs.txt"));
+        return next();
     }
 }

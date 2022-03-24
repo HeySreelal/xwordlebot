@@ -28,15 +28,15 @@ bot.command("profile", profileHandler);
 bot.command("tester", letmeBeATester);
 
 // Admin Commands
-bot.command("mod", AdminHandlers.mod);
-bot.command("log", AdminHandlers.log);
-bot.hears(/^(📊 Get Analytics)$/, AdminHandlers.getAnalytics);
-bot.hears(/^(📃 Get Release Notes)$/, AdminHandlers.getReleaseNotes);
-bot.hears(/^(📝 Set Release Notes)$/, AdminHandlers.askReleasePrompt);
-bot.hears(/^(🚀 Release)$/, AdminHandlers.promptRelease);
-bot.hears(/^(👫 Get Target Players)$/, AdminHandlers.getTargetPlayers);
-bot.hears(/^(👫 Set Target Players)$/, AdminHandlers.askTargetPlayersPrompt);
-bot.hears(/^(🍂 Count Release People)$/, AdminHandlers.getReleaseUsersCount);
+bot.command("mod", AdminHandlers.adminCheck, AdminHandlers.mod);
+bot.command("log", AdminHandlers.adminCheck, AdminHandlers.log);
+bot.hears(/^(📊 Get Analytics)$/, AdminHandlers.adminCheck, AdminHandlers.getAnalytics);
+bot.hears(/^(📃 Get Release Notes)$/, AdminHandlers.adminCheck, AdminHandlers.getReleaseNotes);
+bot.hears(/^(📝 Set Release Notes)$/, AdminHandlers.adminCheck, AdminHandlers.askReleasePrompt);
+bot.hears(/^(🚀 Release)$/, AdminHandlers.adminCheck, AdminHandlers.promptRelease);
+bot.hears(/^(👫 Get Target Players)$/, AdminHandlers.adminCheck, AdminHandlers.getTargetPlayers);
+bot.hears(/^(👫 Set Target Players)$/, AdminHandlers.adminCheck, AdminHandlers.askTargetPlayersPrompt);
+bot.hears(/^(🍂 Count Release People)$/, AdminHandlers.adminCheck, AdminHandlers.getReleaseUsersCount);
 
 bot.filter(WordleFilters.adminFilters, WordleFilters.adminFilterHandlers);
 
