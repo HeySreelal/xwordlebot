@@ -126,17 +126,15 @@ export default class WordleDB {
         }
     }
 
-    static async updateWinsOrLose(isWins: boolean) : Promise<void> {
+    static async updateWinsOrLose(isWins: boolean): Promise<void> {
         try {
+            const config = await WordleDB.getConfigs();
             if (isWins) {
-                await firestore.doc(this.configPath).update({
-                    totalWins: Firestore.FieldValue.increment(1),
-                });
+                config.totalWins++;
             } else {
-                await firestore.doc(this.configPath).update({
-                    totalLoses: Firestore.FieldValue.increment(1),
-                });
+                config.totalLoses++;
             }
+            await WordleDB.updateConfigs(config);
         } catch (err) {
             doLog(`Error while updating wins count: ${err}`);
         }
@@ -195,7 +193,7 @@ export default class WordleDB {
             case "testers": query = colRef.where("role", "==", "Tester"); break;
             case "coolGamers": query = colRef.where("winPercentage", ">", 75); break;
             case "allPlayers":
-                default: query = colRef;
+            default: query = colRef;
         }
         const snapshot = await query.get();
         return snapshot.docs.map(doc => User.fromCloud(doc.data()));

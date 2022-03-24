@@ -45,10 +45,3 @@ export async function doLog(msg: string) {
     // just in case to avoid Too Many Requests
     await sleep(1000);
 }
-
-export function logToFile(msg: string) {
-    const file = './logs.txt';
-    const date = new Date();
-    const data = `${date.toLocaleString()} - ${msg}\n`;
-    fs.appendFileSync(file, data + '\n');
-}

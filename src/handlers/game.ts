@@ -4,7 +4,7 @@ import { errors, notOnGameMessages } from "../config/strings";
 import { getFormatedDuration } from "../helpers/date";
 import { wordExists } from "../helpers/dictionary";
 import handleErrorWithEase from "../helpers/error_logger";
-import { guessPrompt, logToFile, random, resultGrid } from "../helpers/utils";
+import { guessPrompt, random, resultGrid } from "../helpers/utils";
 import WordleDB from "../services/db";
 
 export default async function guessHandler(ctx: Context) {
@@ -64,7 +64,6 @@ export default async function guessHandler(ctx: Context) {
 
             if (user.maxStreak < user.streak) user.maxStreak = user.streak;
 
-            logToFile(`${ctx.from.id} guessed the word ${game.word} in ${user.tries.length} tries!`);
             user.tries = [];
             await WordleDB.updateWinsOrLose(true);
         } else if (user.tries.length >= 6) {
@@ -76,7 +75,6 @@ export default async function guessHandler(ctx: Context) {
                 parse_mode: "HTML"
             });
             await ctx.reply(`New word showing up in ${getFormatedDuration(game.next)}!`);
-            logToFile(`${ctx.from.id} lost the game ${game.word}`);
             user.tries = [];
             await WordleDB.updateWinsOrLose(false);
         } else {
