@@ -1,7 +1,7 @@
 import { Context } from "grammy";
 import { errors, excitedMessages, inGameMessages } from "../config/strings";
 import { getFormatedDuration } from "../helpers/date";
-import { doLog, logToFile, random } from "../helpers/utils";
+import { doLog, random } from "../helpers/utils";
 import WordleDB from "../services/db";
 
 /**
@@ -47,7 +47,6 @@ export default async function startHandler(ctx: Context) {
         }
         await WordleDB.updateUser(user);
         await WordleDB.incrementPlayedCount();
-        logToFile(`${ctx.from.id} started a new game.`);
     } catch (err) {
         await doLog(`Error on startHandler: ${err}`);
         await doLog(`Happened for user: ${ctx.from.id}`);

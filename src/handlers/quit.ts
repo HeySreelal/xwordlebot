@@ -2,7 +2,6 @@ import { Context } from "grammy";
 import { errors, inGameMessages } from "../config/strings";
 import { getFormatedDuration } from "../helpers/date";
 import handleErrorWithEase from "../helpers/error_logger";
-import { logToFile } from "../helpers/utils";
 import WordleDB from "../services/db";
 
 export default async function quitHandler(ctx: Context) {
@@ -17,8 +16,6 @@ export default async function quitHandler(ctx: Context) {
         if (!user.onGame) {
             return ctx.reply(inGameMessages.notOnGame);
         }
-
-        logToFile(`${ctx.from.id} quit the game after ${user.tries.length} tries.`);
 
         user.onGame = false;
         user.lastGame = game.id;

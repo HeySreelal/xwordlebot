@@ -1,6 +1,5 @@
 import bot, { logsChannel } from "../config/config";
 import { getBoxes } from "../handlers/game";
-import * as fs from "fs";
 
 export const guessPrompt = (tryCount: number): string => {
     if (tryCount === 1) {
