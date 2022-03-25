@@ -3,3 +3,4 @@ node_modules
 service-account.json
 dist
 logs.txt
+.DS_Store
