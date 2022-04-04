@@ -19,7 +19,8 @@ The bot is entirely written in TypeScript. Thanks to [grammY](https://grammy.dev
    4. Check the [.env.sample](./.env.sample) file for reference.
 4. Create a Firebase Project and download the Admin SDK creds as `service-account.json`. Save the file inside `src/config/`
 5. Run ```npm run build``` - Make sure you have installed the latest version of [TypeScript](https://www.typescriptlang.org/download)
-6. Run ```npm start``` to start the bot
+6. And to complete the setup run ```npm run setup```.
+7. Run ```npm start``` to start the bot.
 
 
 ## Words
