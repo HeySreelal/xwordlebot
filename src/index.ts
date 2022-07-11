@@ -40,7 +40,7 @@ bot.hears(/^(🍂 Count Release People)$/, AdminHandlers.adminCheck, AdminHandle
 
 bot.filter(WordleFilters.adminFilters, WordleFilters.adminFilterHandlers);
 
-bot.on("channel_post", ctx => {
+bot.on("channel_post", _ => {
     return;
 });
 
